@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objective 5: The Java Language Overview</title>
+  <style>
+    /* Modern Workspace CSS Variables */
+    :root {
+      --workspace-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #1a1f36;
+      --text-muted: #697386;
+      --border-color: #e3e8ee;
+      --primary-color: #0070f3;
+      --primary-hover: #0056b3;
+      --primary-soft: #e5f0ff;
+      --success-color: #10b981;
+      --success-soft: #ecfdf5;
+      --warning-color: #f59e0b;
+      --warning-soft: #fffbeb;
+      --info-color: #0ea5e9;
+      --info-soft: #e0f2fe;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--workspace-bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--primary-color); }
+
+    .bento-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-top { grid-template-columns: 1fr; }
+    @media (min-width: 768px) { .grid-top { grid-template-columns: 2fr 1fr; } }
+
+    .grid-main { grid-template-columns: 1fr; }
+    @media (min-width: 992px) { .grid-main { grid-template-columns: 1fr 1.5fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Control Panel Styles */
+    .control-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .step-btn {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: var(--workspace-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: left;
+      width: 100%;
+    }
+
+    .step-btn:hover { border-color: var(--primary-color); transform: translateX(4px); }
+    .step-btn.active {
+      background: var(--primary-soft);
+      border-color: var(--primary-color);
+      box-shadow: 0 4px 12px rgba(0, 112, 243, 0.1);
+    }
+
+    .step-num {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #fff;
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 0.85rem;
+      border: 1px solid var(--border-color);
+    }
+    .step-btn.active .step-num { background: var(--primary-color); color: #fff; border-color: var(--primary-color); }
+
+    .step-text { font-weight: 600; color: var(--text-main); font-size: 0.95rem; flex: 1; }
+    .step-btn.active .step-text { color: var(--primary-color); }
+
+    /* Visualization Canvas */
+    .canvas-container {
+      position: relative;
+      background: var(--workspace-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      min-height: 480px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scene {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      padding: 2rem;
+      opacity: 0;
+      pointer-events: none;
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateY(20px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .scene.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    /* Reusable Node Styles */
+    .node {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1rem;
+      text-align: center;
+      width: 160px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      position: absolute;
+    }
+    .node-icon { margin-bottom: 0.5rem; color: var(--primary-color); }
+    .node-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; color: var(--text-main); }
+    .node-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Background Paths */
+    .paths-svg {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+    .flow-line { stroke: var(--primary-color); stroke-width: 3px; stroke-dasharray: 6; fill: none; animation: dashFlow 1.5s linear infinite; }
+
+    @keyframes dashFlow { from { stroke-dashoffset: 24; } to { stroke-dashoffset: 0; } }
+
+    /* Scene 1 Specifics */
+    .badge-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; width: 100%; max-width: 400px; }
+    .info-badge { background: #fff; padding: 1.25rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); text-align: center; }
+
+    /* Scene 4 Specifics */
+    .app-grid { display: flex; gap: 1.5rem; justify-content: center; width: 100%; margin-top: 2rem; }
+    .app-card { background: #fff; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; text-align: center; width: 140px; }
+  </style>
+  <link rel="stylesheet" href="chapter-navigation.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation -->
+  <a href="index.html#ch-01" class="nav-back">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    Back to Chapter 1 slides
+  </a>
+    <nav class="chapter-navigation" aria-label="Chapter 1 slide navigation">
+        <a href="ch-01-04.html" rel="prev">← Previous: ch-01-04</a>
+        <span class="chapter-progress">Slide 5 of 5</span>
+        <a href="index.html#ch-01">Finish chapter →</a>
+    </nav>
+
+  <!-- Top Bento Grid -->
+  <div class="bento-grid grid-top">
+    <div class="card">
+      <span class="eyebrow">Concept 5.1</span>
+      <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">The Java Language Overview</h1>
+      <p style="color: var(--text-muted); margin-bottom: 0;">
+        Java is a high-level programming language used to develop different types of software applications. It combines Object-Oriented principles with powerful cross-platform execution capabilities.
+      </p>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <span class="eyebrow">Key Takeaway</span>
+      <p style="font-size: 0.95rem; color: var(--text-main); margin-top: 0.5rem; font-weight: 600;">
+        Java does not compile directly to machine code. It compiles to Bytecode, which is then interpreted by the JVM on any operating system.
+      </p>
+    </div>
+  </div>
+
+  <!-- Main Interactive Section -->
+  <div class="bento-grid grid-main">
+
+    <!-- Left: Step Details & Controls -->
+    <div class="card" style="display: flex; flex-direction: column;">
+      <span class="eyebrow" style="margin-bottom: 1.5rem;">Explore Java Details</span>
+
+      <div class="control-panel">
+        <button class="step-btn active" onclick="setStep(1)">
+          <span class="step-num">1</span>
+          <span class="step-text">History & Core Concepts</span>
+        </button>
+
+        <button class="step-btn" onclick="setStep(2)">
+          <span class="step-num">2</span>
+          <span class="step-text">Compilation (Bytecode)</span>
+        </button>
+
+        <button class="step-btn" onclick="setStep(3)">
+          <span class="step-num">3</span>
+          <span class="step-text">Execution (The JVM)</span>
+        </button>
+
+        <button class="step-btn" onclick="setStep(4)">
+          <span class="step-num">4</span>
+          <span class="step-text">Real-World Applications</span>
+        </button>
+      </div>
+
+      <div id="step-description" style="margin-top: auto; padding: 1.25rem; background: var(--workspace-bg); border-radius: var(--radius-md); font-size: 0.9rem; color: var(--text-muted); line-height: 1.6;">
+        Developed by James Gosling and his team at Sun Microsystems in 1995. It is a strictly Object-Oriented Programming (OOP) language.
+      </div>
+    </div>
+
+    <!-- Right: Dynamic Canvas -->
+    <div class="canvas-container">
+
+      <!-- SCENE 1: History & Concepts -->
+      <div class="scene active" id="scene-1">
+        <svg width="48" height="48" fill="none" stroke="var(--primary-color)" viewBox="0 0 24 24" style="margin-bottom: 1.5rem;">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+        </svg>
+        <h3 style="margin-bottom: 2rem; font-size: 1.25rem; color: var(--text-main);">Foundations of Java</h3>
+
+        <div class="badge-grid">
+          <div class="info-badge">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Creator</div>
+            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main); margin-top: 0.25rem;">James Gosling</div>
+          </div>
+          <div class="info-badge">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Introduced</div>
+            <div style="font-size: 1rem; font-weight: 600; color: var(--text-main); margin-top: 0.25rem;">1995</div>
+          </div>
+          <div class="info-badge" style="grid-column: span 2;">
+            <div style="font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700;">Paradigm</div>
+            <div style="font-size: 1rem; font-weight: 600; color: var(--primary-color); margin-top: 0.25rem;">Object-Oriented Programming (OOP)</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SCENE 2: Compilation to Bytecode -->
+      <div class="scene" id="scene-2">
+        <svg class="paths-svg">
+          <defs>
+            <marker id="arrow-c" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--primary-color)" />
+            </marker>
+          </defs>
+          <line class="flow-line" x1="50%" y1="20%" x2="50%" y2="40%" marker-end="url(#arrow-c)" />
+          <line class="flow-line" x1="50%" y1="60%" x2="50%" y2="80%" marker-end="url(#arrow-c)" />
+        </svg>
+
+        <div class="node" style="top: 10%; left: 50%; transform: translateX(-50%); z-index: 2;">
+          <div class="node-icon"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg></div>
+          <div class="node-title">Source Code</div>
+          <div class="node-desc">.java file</div>
+        </div>
+
+        <div class="node" style="top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2; border-color: var(--primary-color); box-shadow: 0 0 0 4px var(--primary-soft);">
+          <div class="node-icon"><svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg></div>
+          <div class="node-title">Java Compiler</div>
+          <div class="node-desc">Translates</div>
+        </div>
+
+        <div class="node" style="bottom: 10%; left: 50%; transform: translateX(-50%); z-index: 2; border-color: var(--warning-color); background: var(--warning-soft);">
+          <div class="node-icon" style="color: var(--warning-color);"><svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg></div>
+          <div class="node-title" style="color: var(--warning-color);">Bytecode</div>
+          <div class="node-desc">.class (Universal)</div>
+        </div>
+      </div>
+
+      <!-- SCENE 3: Execution (JVM) -->
+      <div class="scene" id="scene-3">
+        <h3 style="position: absolute; top: 1.5rem; width: 100%; text-align: center; font-size: 1.1rem; color: var(--text-main);">"Write Once, Run Anywhere"</h3>
+
+        <svg class="paths-svg">
+          <defs>
+            <marker id="arrow-s" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--success-color)" />
+            </marker>
+          </defs>
+          <!-- Branching to OS -->
+          <path class="flow-line" style="stroke: var(--success-color);" d="M 50% 35% L 50% 50% L 20% 50% L 20% 70%" marker-end="url(#arrow-s)" />
+          <line class="flow-line" style="stroke: var(--success-color);" x1="50%" y1="35%" x2="50%" y2="70%" marker-end="url(#arrow-s)" />
+          <path class="flow-line" style="stroke: var(--success-color);" d="M 50% 35% L 50% 50% L 80% 50% L 80% 70%" marker-end="url(#arrow-s)" />
+        </svg>
+
+        <div class="node" style="top: 25%; left: 50%; transform: translate(-50%, -50%); z-index: 2; border-color: var(--warning-color); background: var(--warning-soft); padding: 0.75rem; width: 140px;">
+          <div class="node-title" style="color: var(--warning-color); font-size: 0.85rem; margin:0;">Bytecode (.class)</div>
+        </div>
+
+        <!-- JVMs -->
+        <div class="node" style="top: 80%; left: 20%; transform: translate(-50%, -50%); z-index: 2; border-color: var(--success-color); box-shadow: 0 0 0 4px var(--success-soft);">
+          <div class="node-icon" style="color: var(--success-color);"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"></path></svg></div>
+          <div class="node-title" style="color: var(--success-color);">Windows JVM</div>
+        </div>
+
+        <div class="node" style="top: 80%; left: 50%; transform: translate(-50%, -50%); z-index: 2; border-color: var(--success-color); box-shadow: 0 0 0 4px var(--success-soft);">
+          <div class="node-icon" style="color: var(--success-color);"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M17.05 20.28c-.98.95-2.05 1.8-3.08 1.8-1.09 0-1.46-.68-3.26-.68-1.81 0-2.22.66-3.23.68-1.06.02-2.24-.93-3.26-1.93-2.18-2.13-3.95-6.05-2.88-8.89.51-1.36 1.48-2.3 2.59-2.83 1.14-.54 2.4-.49 3.47.05 1.05.51 1.7.53 2.72.5 1.25-.03 2.58-.69 3.89-.69 1.11 0 2.45.38 3.32 1.24-2.29 1.41-1.92 4.63.42 5.58-.51 1.4-1.2 2.68-2.19 3.65m-3.56-11.8c-.89-.96-1.74-2.81-1.63-4.13 1.15.06 2.68.79 3.56 1.78.81.93 1.62 2.7 1.46 3.99-1.09.07-2.58-.67-3.39-1.64"></path></svg></div>
+          <div class="node-title" style="color: var(--success-color);">Mac JVM</div>
+        </div>
+
+        <div class="node" style="top: 80%; left: 80%; transform: translate(-50%, -50%); z-index: 2; border-color: var(--success-color); box-shadow: 0 0 0 4px var(--success-soft);">
+          <div class="node-icon" style="color: var(--success-color);"><svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M12.016 1.28c-1.35.006-2.857.377-4.195.961-3.666 1.597-5.556 4.352-6.064 7.558-.088.56-.051 1.543.082 2.164.846 3.945 3.56 7.632 7.151 9.704 1.002.576 1.968 1.054 2.41 1.191.139.043.275.05.357.016.082-.033.242-.257.357-.502.502-1.066 1.765-2.203 3.013-2.709.283-.114.332-.162.297-.291-.043-.162-.12-.224-.316-.252-1.121-.16-2.531-.832-3.394-1.615-.818-.744-1.428-1.79-1.623-2.784-.047-.238-.031-.285.074-.23.107.054.341.11.519.123.18.013.344-.017.365-.067.021-.05.006-.118-.035-.152-.041-.034-.176-.113-.301-.176-.71-.358-1.285-.892-1.609-1.498-.125-.233-.187-.417-.197-.583-.016-.279.1-.555.334-.789.283-.284.773-.473 1.291-.497.355-.017.585.021.734.12.148.099.168.102.326.045.244-.087.642-.083.896.009.24.086.533.307.642.484.053.086.084.184.072.232-.012.048-.121.084-.242.08-.225-.008-.475.093-.654.264-.326.312-.424.787-.242 1.183.18.393.593.754 1.058.918.423.15.939.115 1.347-.092.492-.25.861-.715 1.011-1.277.05-.184.062-.357.042-.522-.041-.336-.211-.632-.515-.9-.379-.333-.923-.513-1.464-.483-.242.013-.32.001-.355-.054-.035-.055-.02-.125.045-.224.22-.338.486-.605.795-.795.341-.21.777-.323 1.193-.31.332.01.621.082.88.221.144.077.291.133.328.125.037-.008.055-.064.041-.125-.064-.28-.216-.621-.402-.904-.26-.395-.623-.746-1.048-.998-.679-.403-1.503-.548-2.274-.397-.246.048-.287.039-.328-.074-.041-.113-.041-.13.002-.158.261-.17 1.066-.353 1.574-.357 1.146-.008 2.222.383 3.013 1.096.347.313.623.676.804 1.066.074.16.14.283.146.273.006-.01-.008-.135-.031-.277-.078-.469-.304-1.033-.568-1.423-.39-.58-1.042-1.088-1.74-1.353-.33-.125-1.127-.279-1.517-.293-.197-.007-.228-.024-.265-.142-.037-.118-.047-.13-.156-.166-.33-.11-.806-.11-1.134 0-.11.036-.12.048-.156.166-.037.118-.068.135-.265.142-1.064.037-2.128.468-2.905 1.177-.384.351-.73 1.06-.798 1.637-.014.12-.027.218-.031.218s.004-.082.018-.184c.148-1.05 1.042-1.921 2.062-2.007l.228-.02v-.091c0-.127.135-.275.326-.358.113-.049.123-.062.133-.166.012-.132.06-.212.164-.271.18-.103.453-.083.634.047.098.07.12.072.162.012.074-.107.283-.178.484-.162.181.014.337.103.408.232l.035.064h.168c.17 0 .22.023.328.156.121.148.168.326.129.49-.033.136-.027.15.062.15.111 0 .285.086.363.178.105.127.117.279.033.428-.07.123-.066.136.037.175.05.02.13.085.176.146.125.166.127.355.006.511-.08.102-.08.107.014.175.25.18.423.498.421.777-.002.32-.2.627-.492.766-.101.048-.13.085-.148.191-.035.203.047.457.199.613l.08.082.162-.057c.189-.066.388-.066.574 0l.162.057.08-.082c.152-.156.234-.41.199-.613-.018-.106-.047-.143-.148-.191-.291-.139-.49-.446-.492-.766-.002-.279.171-.597.421-.777.094-.068.094-.073.014-.175-.121-.156-.119-.345.006-.511.046-.061.126-.126.176-.146.103-.039.107-.052.037-.175-.084-.149-.072-.301.033-.428.078-.092.252-.178.363-.178.089 0 .095-.014.062-.15-.039-.164.008-.342.129-.49.108-.133.158-.156.328-.156h.168l.035-.064c.071-.129.227-.218.408-.232.201-.016.41.055.484.162.042.06.064.058.162-.012.181-.13.454-.15.634-.047.104.059.152.139.164.271.01.104.02.117.133.166.191.083.326.231.326.358v.091l.228.02c1.02.086 1.914.957 2.062 2.007.014.102.022.184.018.184-.004 0-.017-.098-.031-.218-.068-.577-.414-1.286-.798-1.637-.777-.709-1.841-1.14-2.905-1.177-.197-.007-.228-.024-.265-.142-.036-.118-.046-.13-.156-.166-.328-.11-.804-.11-1.134 0-.109.036-.119.048-.156.166-.037.118-.068.135-.265.142-.39.014-1.187.168-1.517.293-.698.265-1.35.773-1.74 1.353-.264.39-.49 1.02-.568 1.423-.023.142-.037.267-.031.277.006.01.072-.113.146-.273.181-.39.457-.753.804-1.066.791-.713 1.867-1.104 3.013-1.096.508.004 1.313.187 1.574.357.043.028.043.045.002.158-.041.113-.082.122-.328.074-.771-.151-1.595-.006-2.274.397-.425.252-.788.603-1.048.998-.186.283-.338.624-.402.904-.014.061.004.117.041.125.037.008.184-.048.328-.125.259-.139.548-.211.88-.221.416-.013.852.1 1.193.31.309.19.575.457.795.795.065.099.08.169.045.224-.035.055-.113.067-.355.054-.541-.03-1.085.15-1.464.483-.304.268-.474.564-.515.9-.02.165-.008.338.042.522.15.562.519 1.027 1.011 1.277.408.207.924.242 1.347.092.465-.164.878-.525 1.058-.918.182-.396.084-.871-.242-1.183-.179-.171-.429-.272-.654-.264-.121.004-.23.032-.242-.08-.012-.048.019-.146.072-.232.109-.177.402-.398.642-.484.254-.092.652-.096.896-.009.158.057.178.054.326-.045.149-.099.379-.137.734-.12.518.024 1.008.213 1.291.497.234.234.35.51.334.789-.01.166-.072.35-.197.583-.324.606-.899 1.14-1.609 1.498-.125.063-.26.142-.301.176-.041.034-.056.102-.035.152.021.05.185.08.365.067.178-.013.412-.069.519-.123.105-.055.121-.008.074.23-.195.994-.805 2.04-1.623 2.784-.863.783-2.273 1.455-3.394 1.615-.196.028-.273.09-.316.252-.035.129.014.177.297.291 1.248.506 2.511 1.643 3.013 2.709.115.245.275.469.357.502.082.034.218.027.357-.016.442-.137 1.408-.615 2.41-1.191 3.591-2.072 6.305-5.759 7.151-9.704.133-.621.17-1.604.082-2.164-.508-3.206-2.398-5.961-6.064-7.558-1.338-.584-2.845-.955-4.195-.961z"></path></svg></div>
+          <div class="node-title" style="color: var(--success-color);">Linux JVM</div>
+        </div>
+      </div>
+
+      <!-- SCENE 4: Applications -->
+      <div class="scene" id="scene-4">
+        <h3 style="margin-bottom: 0.5rem; font-size: 1.25rem; color: var(--text-main);">Where is Java Used?</h3>
+        <p style="color: var(--text-muted); margin-bottom: 2rem; max-width: 400px; text-align: center; font-size: 0.95rem;">Because of its stability and cross-platform nature, Java powers millions of applications globally.</p>
+
+        <div class="app-grid">
+          <div class="app-card">
+            <svg width="32" height="32" fill="none" stroke="var(--info-color)" viewBox="0 0 24 24" style="margin-bottom: 1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path></svg>
+            <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Enterprise Systems</div>
+          </div>
+          <div class="app-card">
+            <svg width="32" height="32" fill="none" stroke="var(--info-color)" viewBox="0 0 24 24" style="margin-bottom: 1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+            <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Web & Backend</div>
+          </div>
+          <div class="app-card">
+            <svg width="32" height="32" fill="none" stroke="var(--info-color)" viewBox="0 0 24 24" style="margin-bottom: 1rem;"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>
+            <div style="font-weight: 700; color: var(--text-main); font-size: 0.9rem;">Android Apps</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  const descriptions = [
+    "",
+    "Developed by James Gosling and his team at Sun Microsystems in 1995. It is a strictly Object-Oriented Programming (OOP) language.",
+    "Instead of compiling directly to machine code, the Java Compiler creates an intermediate file called Bytecode (.class).",
+    "This Bytecode is universal. It is executed by the Java Virtual Machine (JVM), which is specifically installed for Windows, Mac, or Linux.",
+    "Thanks to its 'Write Once, Run Anywhere' architecture, Java is heavily used in Enterprise Software, Backend Web Services, and Android Development."
+  ];
+
+  function setStep(stepNum) {
+    // Update Buttons
+    document.querySelectorAll('.step-btn').forEach((btn, index) => {
+      if(index + 1 === stepNum) btn.classList.add('active');
+      else btn.classList.remove('active');
+    });
+
+    // Update Description Text
+    document.getElementById('step-description').innerText = descriptions[stepNum];
+
+    // Update Canvas Scene
+    document.querySelectorAll('.scene').forEach((scene, index) => {
+      if(index + 1 === stepNum) scene.classList.add('active');
+      else scene.classList.remove('active');
+    });
+  }
+</script>
+</body>
+</html>

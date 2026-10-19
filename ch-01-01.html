@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Objective 1: Computer Architecture</title>
+    <style>
+        /* Modern Workspace CSS Variables */
+        :root {
+            --workspace-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-main: #1a1f36;
+            --text-muted: #697386;
+            --border-color: #e3e8ee;
+            --primary-color: #0070f3;
+            --primary-hover: #0056b3;
+            --primary-soft: #e5f0ff;
+            --success-color: #10b981;
+            --success-soft: #ecfdf5;
+            --warning-color: #f59e0b;
+            --radius-lg: 24px;
+            --radius-md: 16px;
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.04);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--workspace-bg);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        .nav-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+            transition: color 0.2s;
+        }
+
+        .nav-back:hover { color: var(--primary-color); }
+
+        .bento-grid {
+            display: grid;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .grid-top { grid-template-columns: 1fr; }
+        @media (min-width: 768px) { .grid-top { grid-template-columns: 1.5fr 1fr; } }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        /* Control Panel */
+        .control-panel {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            background: var(--workspace-bg);
+            padding: 0.5rem 0.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        .step-indicator {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-main);
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .step-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            display: block;
+            margin-top: 0.25rem;
+        }
+
+        .btn-ctrl {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-main);
+            font-weight: 600;
+            font-size: 0.9rem;
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .btn-ctrl:hover:not(:disabled) {
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-ctrl:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background-color: transparent;
+        }
+
+        .btn-ctrl.primary {
+            background-color: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .btn-ctrl.primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        /* Restructured Diagram Canvas */
+        .flow-canvas {
+            position: relative;
+            background: var(--workspace-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            height: 480px;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+
+        .node {
+            position: absolute;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.25rem 1rem;
+            text-align: center;
+            width: 150px;
+            z-index: 2;
+            transform: translate(-50%, -50%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        /* Logical Positions */
+        #node-input { left: 18%; top: 35%; }
+        #node-processing { left: 50%; top: 35%; border-width: 3px; }
+        #node-output { left: 82%; top: 35%; }
+        #node-storage { left: 50%; top: 80%; }
+
+        .node-icon { margin-bottom: 0.5rem; color: var(--text-muted); transition: all 0.4s ease; }
+        .node-title { font-weight: 700; font-size: 1.05rem; margin-bottom: 0.25rem; transition: color 0.4s ease; }
+        .node-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+        /* Data Packets Base */
+        .packet {
+            position: absolute;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.35rem 0.85rem;
+            border-radius: 20px;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+            pointer-events: none;
+            white-space: nowrap;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+        }
+
+        .packet-raw { background-color: var(--warning-color); box-shadow: 0 4px 10px rgba(245, 158, 11, 0.4); }
+        .packet-info { background-color: var(--success-color); box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4); }
+        .packet-file { background-color: var(--primary-color); box-shadow: 0 4px 10px rgba(0, 112, 243, 0.4); }
+
+        /* Base Packets Starting Positions */
+        #packet-1 { left: 18%; top: 35%; }
+        #packet-2 { left: 50%; top: 35%; }
+        #packet-3 { left: 50%; top: 48%; }
+
+        /* Background SVG for Paths */
+        .paths-svg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .flow-path {
+            stroke: var(--border-color);
+            stroke-width: 3px;
+            fill: none;
+            transition: all 0.4s ease;
+        }
+
+        .path-label {
+            font-family: system-ui, sans-serif;
+            font-size: 12px;
+            font-weight: 600;
+            fill: var(--text-muted);
+            text-anchor: middle;
+            transition: fill 0.4s ease;
+        }
+
+        /* =========================================
+           STATE MACHINE CSS
+           Controls visibility based on .state-X classes
+           ========================================= */
+
+        /* STATE 1: INPUT */
+        .state-1 #node-input {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-soft);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .state-1 #node-input .node-icon, .state-1 #node-input .node-title { color: var(--primary-color); }
+        .state-1 #path-in { stroke: var(--primary-color); stroke-dasharray: 6; animation: dashFlow 1s linear infinite; }
+        .state-1 .label-in { fill: var(--primary-color); }
+        .state-1 #packet-1 { opacity: 1; left: 40%; }
+
+        /* STATE 2: PROCESSING */
+        .state-2 #node-processing {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-soft);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .state-2 #node-processing .node-icon, .state-2 #node-processing .node-title { color: var(--primary-color); }
+        .state-2 #node-processing .node-icon svg { transform: rotate(180deg); }
+        .state-2 #packet-1 { opacity: 0; left: 50%; } /* packet enters processor and hides */
+
+        /* STATE 3: OUTPUT & STORAGE */
+        .state-3 #node-output, .state-3 #node-storage {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--primary-soft);
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+        .state-3 #node-output .node-icon, .state-3 #node-output .node-title,
+        .state-3 #node-storage .node-icon, .state-3 #node-storage .node-title { color: var(--primary-color); }
+
+        .state-3 #path-out, .state-3 #path-store { stroke: var(--primary-color); stroke-dasharray: 6; animation: dashFlow 1s linear infinite; }
+        .state-3 .label-out, .state-3 .label-store { fill: var(--primary-color); }
+
+        .state-3 #packet-2 { opacity: 1; left: 74%; }
+        .state-3 #packet-3 { opacity: 1; top: 67%; }
+
+        @keyframes dashFlow {
+            from { stroke-dashoffset: 24; }
+            to { stroke-dashoffset: 0; }
+        }
+
+    </style>
+  <link rel="stylesheet" href="chapter-navigation.css">
+</head>
+<body>
+
+<div class="container">
+    <!-- Navigation -->
+    <a href="index.html#ch-01" class="nav-back">
+        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+        Back to Chapter 1 slides
+    </a>
+    <nav class="chapter-navigation" aria-label="Chapter 1 slide navigation">
+        <a href="index.html#ch-01">← Course index</a>
+        <span class="chapter-progress">Slide 1 of 5</span>
+        <a href="ch-01-02.html" rel="next">Next: ch-01-02 →</a>
+    </nav>
+
+    <!-- Top Bento Grid -->
+    <div class="bento-grid grid-top">
+        <div class="card">
+            <span class="eyebrow">Concept 1.1</span>
+            <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">What is a Computer?</h1>
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                A computer is an electronic device that receives data, processes it, stores it, and produces information.
+            </p>
+        </div>
+
+        <!-- Hardware vs Software Toggle (Simplified for space) -->
+        <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+            <span class="eyebrow">Instructor Note</span>
+            <p style="font-size: 0.95rem; color: var(--text-main); margin-top: 0.5rem; line-height: 1.6;">
+                Use the control panel below to walk students through the <strong>Information Processing Cycle</strong> step-by-step. Emphasize the transformation from raw data into meaningful information.
+            </p>
+        </div>
+    </div>
+
+    <!-- Interactive Diagram -->
+    <div class="card">
+
+        <!-- Step Control Header -->
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <div>
+                <span class="eyebrow">Interactive IPO Diagram</span>
+                <h3 style="font-size: 1.25rem;">The Information Processing Cycle</h3>
+            </div>
+
+            <!-- NEW CONTROL PANEL -->
+            <div class="control-panel">
+                <button class="btn-ctrl" id="btnPrev" onclick="changeStep(-1)" disabled>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+                    Back
+                </button>
+
+                <div class="step-indicator">
+                    <span id="stepCounter">Step 0 of 3</span>
+                    <span class="step-desc" id="stepDesc">Ready to start</span>
+                </div>
+
+                <button class="btn-ctrl primary" id="btnNext" onclick="changeStep(1)">
+                    Next
+                    <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Flow Canvas State Machine Container -->
+        <div class="flow-canvas state-0" id="canvasContainer">
+
+            <!-- SVG Paths -->
+            <svg class="paths-svg">
+                <defs>
+                    <!-- Arrowheads are managed by color inheritance in CSS, but fallback definitions provided -->
+                    <marker id="arrow-muted" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="var(--border-color)" />
+                    </marker>
+                </defs>
+
+                <!-- Input to Process -->
+                <line id="path-in" class="flow-path" x1="26%" y1="35%" x2="42%" y2="35%" />
+                <text x="34%" y="32%" class="path-label label-in">Raw Data</text>
+
+                <!-- Process to Output -->
+                <line id="path-out" class="flow-path" x1="58%" y1="35%" x2="74%" y2="35%" />
+                <text x="66%" y="32%" class="path-label label-out">Information</text>
+
+                <!-- Process to Storage -->
+                <line id="path-store" class="flow-path" x1="50%" y1="48%" x2="50%" y2="67%" />
+                <text x="56%" y="58%" class="path-label label-store">Save / Load</text>
+            </svg>
+
+            <!-- Animated Data Packets -->
+            <div id="packet-1" class="packet packet-raw">2 + 2</div>
+            <div id="packet-2" class="packet packet-info">4</div>
+            <div id="packet-3" class="packet packet-file">Save.doc</div>
+
+            <!-- 1. Input Node -->
+            <div class="node" id="node-input">
+                <div class="node-icon">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                </div>
+                <div class="node-title">1. Input</div>
+                <div class="node-desc">Enter raw data</div>
+            </div>
+
+            <!-- 2. Processing Node -->
+            <div class="node" id="node-processing">
+                <div class="node-icon">
+                    <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </div>
+                <div class="node-title">2. Processing</div>
+                <div class="node-desc">CPU executes tasks</div>
+            </div>
+
+            <!-- 3. Output Node -->
+            <div class="node" id="node-output">
+                <div class="node-icon">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                </div>
+                <div class="node-title">3. Output</div>
+                <div class="node-desc">View information</div>
+            </div>
+
+            <!-- 4. Storage Node -->
+            <div class="node" id="node-storage">
+                <div class="node-icon">
+                    <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>
+                </div>
+                <div class="node-title">4. Storage</div>
+                <div class="node-desc">Save data for later</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let currentStep = 0;
+    const maxStep = 3;
+
+    const stepDescriptions = [
+        "Ready to start",
+        "Data enters the system",
+        "CPU processes data",
+        "Result is shown & saved"
+    ];
+
+    function changeStep(direction) {
+        // Update Step Variable
+        currentStep += direction;
+        if (currentStep < 0) currentStep = 0;
+        if (currentStep > maxStep) currentStep = maxStep;
+
+        // Update UI Controls
+        document.getElementById('btnPrev').disabled = (currentStep === 0);
+        document.getElementById('btnNext').disabled = (currentStep === maxStep);
+        document.getElementById('stepCounter').innerText = `Step ${currentStep} of ${maxStep}`;
+        document.getElementById('stepDesc').innerText = stepDescriptions[currentStep];
+
+        // Update Canvas State Class
+        const canvas = document.getElementById('canvasContainer');
+        // Remove all state classes
+        canvas.classList.remove('state-0', 'state-1', 'state-2', 'state-3');
+        // Apply current state class
+        canvas.classList.add(`state-${currentStep}`);
+    }
+</script>
+</body>
+</html>

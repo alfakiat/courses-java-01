@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objective 4: Compilers vs. Interpreters</title>
+  <style>
+    /* Modern Workspace CSS Variables */
+    :root {
+      --workspace-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #1a1f36;
+      --text-muted: #697386;
+      --border-color: #e3e8ee;
+      --primary-color: #0070f3; /* Compiler Theme */
+      --primary-hover: #0056b3;
+      --primary-soft: #e5f0ff;
+      --success-color: #10b981; /* Interpreter Theme */
+      --success-soft: #ecfdf5;
+      --warning-color: #f59e0b;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--workspace-bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--primary-color); }
+
+    .bento-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-top { grid-template-columns: 1fr; }
+    @media (min-width: 768px) { .grid-top { grid-template-columns: 1.5fr 1fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Control Panel */
+    .control-panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--workspace-bg);
+      padding: 0.5rem 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .step-indicator {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 200px;
+      text-align: center;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .btn-ctrl {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ctrl:hover:not(:disabled) {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-ctrl:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: transparent;
+    }
+
+    .btn-ctrl.primary {
+      background-color: var(--text-main);
+      color: white;
+      border-color: var(--text-main);
+    }
+
+    .btn-ctrl.primary:hover:not(:disabled) {
+      background-color: #000;
+    }
+
+    /* Canvas Layout */
+    .comparison-canvas {
+      position: relative;
+      background: var(--workspace-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      /*height: 600px;*/
+      margin-top: 1.5rem;
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr;
+      overflow: hidden;
+    }
+
+    .divider { background: var(--border-color); height: 100%; width: 1px; }
+
+    .track {
+      position: relative;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .track-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      text-align: center;
+      margin-bottom: 1.5rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .track-compiler .track-title { color: var(--primary-color); }
+    .track-interpreter .track-title { color: var(--success-color); }
+
+    /* Nodes */
+    .node {
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 0.85rem;
+      text-align: center;
+      width: 180px;
+      z-index: 2;
+      transition: all 0.4s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      margin-bottom: 2rem;
+      position: relative;
+    }
+
+    .node-file {
+      background: var(--primary-soft);
+      border: 2px dashed var(--primary-color);
+      opacity: 0.4;
+      transform: scale(0.95);
+    }
+
+    .node:last-child { margin-bottom: 0; }
+
+    .node-icon { margin-bottom: 0.5rem; color: var(--text-muted); transition: all 0.4s ease; }
+    .node-title { font-weight: 700; font-size: 0.95rem; margin-bottom: 0.25rem; transition: color 0.4s ease; }
+    .node-desc { font-size: 0.75rem; color: var(--text-muted); }
+
+    /* Lines and Paths */
+    .path-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .flow-line {
+      stroke: var(--border-color);
+      stroke-width: 3px;
+      fill: none;
+      transition: all 0.4s ease;
+    }
+
+    .flow-arrow {
+      fill: var(--border-color);
+      transition: all 0.4s ease;
+    }
+
+    /* Animated Packets */
+    .packet {
+      position: absolute;
+      color: #fff;
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 12px;
+      z-index: 3;
+      pointer-events: none;
+      opacity: 0;
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform: translateX(-50%);
+      left: 50%;
+    }
+
+    .packet-bulk { background: var(--primary-color); }
+    .packet-line { background: var(--success-color); border-radius: 20px; }
+
+    @keyframes dashFlow {
+      from { stroke-dashoffset: 24; }
+      to { stroke-dashoffset: 0; }
+    }
+
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* =========================================
+       STATE MACHINE CSS
+       ========================================= */
+
+    /* STATE 1: SOURCE CODE */
+    .state-1 .node-src {
+      border-color: var(--text-main);
+      box-shadow: 0 0 0 4px #e3e8ee;
+    }
+    .state-1 .node-src .node-title { color: var(--text-main); }
+
+    /* STATE 2: TRANSLATION PHASE (Compiler makes file, Interpreter runs line) */
+
+    /* Compiler creates file */
+    .state-2 .track-compiler .node-trans {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    .state-2 .track-compiler .node-trans .node-icon { color: var(--primary-color); animation: spin 2s linear infinite; }
+    .state-2 .line-c-1 { stroke: var(--primary-color); stroke-dasharray: 6; animation: dashFlow 1s linear infinite; }
+    .state-2 .arrow-c-1 { fill: var(--primary-color); }
+    .state-2 #pkt-c-1 { opacity: 1; top: 220px; }
+
+    /* The New File Appears */
+    .state-2 .track-compiler .node-file {
+      opacity: 1;
+      transform: scale(1);
+      border-style: solid;
+      box-shadow: 0 4px 15px rgba(0, 112, 243, 0.2);
+      transition-delay: 0.5s;
+    }
+    .state-2 .track-compiler .node-file .node-icon, .state-2 .track-compiler .node-file .node-title { color: var(--primary-color); }
+
+    /* Interpreter reads and runs immediately */
+    .state-2 .track-interpreter .node-trans {
+      border-color: var(--success-color);
+      box-shadow: 0 0 0 4px var(--success-soft);
+    }
+    .state-2 .track-interpreter .node-trans .node-icon { color: var(--success-color); animation: spin 1s linear infinite; }
+    .state-2 .line-i-1 { stroke: var(--success-color); stroke-dasharray: 6; animation: dashFlow 0.5s linear infinite; }
+    .state-2 .arrow-i-1 { fill: var(--success-color); }
+    .state-2 #pkt-i-1 { opacity: 1; top: 220px; }
+
+    .state-2 .track-interpreter .node-exe { border-color: var(--success-color); transition-delay: 0.5s; }
+    .state-2 .line-i-2 { stroke: var(--success-color); stroke-dasharray: 6; animation: dashFlow 0.5s linear infinite; transition-delay: 0.5s; }
+    .state-2 .arrow-i-2 { fill: var(--success-color); }
+    .state-2 #pkt-i-2 { opacity: 1; top: 400px; transition-delay: 0.5s; }
+
+    /* STATE 3: EXECUTION PHASE (Compiler runs the new file, Interpreter loops) */
+
+    /* Compiler Runs Executable */
+    .state-3 .track-compiler .node-file { opacity: 1; border-style: solid; }
+    .state-3 .track-compiler .node-exe {
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 4px var(--primary-soft);
+    }
+    .state-3 .track-compiler .node-exe .node-icon, .state-3 .track-compiler .node-exe .node-title { color: var(--primary-color); }
+    .state-3 .line-c-2 { stroke: var(--primary-color); stroke-dasharray: 6; animation: dashFlow 0.8s linear infinite; }
+    .state-3 .arrow-c-2 { fill: var(--primary-color); }
+    .state-3 #pkt-c-2 { opacity: 1; top: 460px; }
+
+    /* Interpreter Loops next line */
+    .state-3 .track-interpreter .node-trans, .state-3 .track-interpreter .node-exe {
+      border-color: var(--success-color);
+      box-shadow: 0 0 0 4px var(--success-soft);
+    }
+    .state-3 .track-interpreter .node-trans .node-icon { color: var(--success-color); animation: spin 1s linear infinite; }
+    .state-3 .line-i-1, .state-3 .line-i-2 { stroke: var(--success-color); stroke-dasharray: 6; animation: dashFlow 0.5s linear infinite; }
+    .state-3 .arrow-i-1, .state-3 .arrow-i-2 { fill: var(--success-color); }
+
+    .state-3 #pkt-i-3 { opacity: 1; top: 220px; } /* Line 2 going in */
+    .state-3 #pkt-i-4 { opacity: 1; top: 400px; transition-delay: 0.4s; } /* Line 2 coming out */
+
+  </style>
+  <link rel="stylesheet" href="chapter-navigation.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation -->
+  <a href="index.html#ch-01" class="nav-back">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    Back to Chapter 1 slides
+  </a>
+    <nav class="chapter-navigation" aria-label="Chapter 1 slide navigation">
+        <a href="ch-01-03.html" rel="prev">← Previous: ch-01-03</a>
+        <span class="chapter-progress">Slide 4 of 5</span>
+        <a href="ch-01-05.html" rel="next">Next: ch-01-05 →</a>
+    </nav>
+
+  <!-- Top Bento Grid -->
+  <div class="bento-grid grid-top">
+    <div class="card">
+      <span class="eyebrow">Concept 4.1</span>
+      <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">Compilers vs. Interpreters</h1>
+      <p style="color: var(--text-muted); margin-bottom: 1rem;">
+        Both translate high-level code into machine code, but their architecture differs completely in <strong>when</strong> and <strong>how</strong> a separate executable file is generated.
+      </p>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <span class="eyebrow">Key Architectural Difference</span>
+      <ul style="font-size: 0.95rem; color: var(--text-main); padding-left: 1rem; margin-top: 0.5rem; line-height: 1.8;">
+        <li><strong>Compiler:</strong> Translates entirely upfront to generate a standalone <code>.exe</code> or <code>.class</code> file. Execution happens later.</li>
+        <li><strong>Interpreter:</strong> No new file is created. Translates and executes line-by-line in real-time.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Interactive Diagram -->
+  <div class="card">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="eyebrow">Execution Pipeline</span>
+        <h3 style="font-size: 1.25rem;">File Generation vs. On-the-Fly</h3>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <button class="btn-ctrl" id="btnPrev" onclick="changeStep(-1)" disabled>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          Back
+        </button>
+
+        <div class="step-indicator">
+          <span id="stepCounter">Phase 0: Idle</span>
+          <span class="step-desc" id="stepDesc">Ready to start</span>
+        </div>
+
+        <button class="btn-ctrl primary" id="btnNext" onclick="changeStep(1)">
+          Next Phase
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Canvas Container -->
+    <div class="comparison-canvas state-0" id="canvasContainer">
+
+      <!-- Background SVG Paths -->
+      <svg class="path-container">
+        <defs>
+          <marker id="arrow-c" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path class="arrow-c-1" d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+          <marker id="arrow-c2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path class="arrow-c-2" d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+          <marker id="arrow-i" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path class="arrow-i-1" d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+          <marker id="arrow-i2" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto-start-reverse">
+            <path class="arrow-i-2" d="M 0 0 L 10 5 L 0 10 z" />
+          </marker>
+        </defs>
+
+        <!-- Compiler Track Lines (4 Nodes = 3 Lines) -->
+        <!-- Source to Compiler -->
+        <line class="flow-line line-c-1" x1="25%" y1="130" x2="25%" y2="200" marker-end="url(#arrow-c)" />
+        <!-- Compiler to File -->
+        <line class="flow-line line-c-1" x1="25%" y1="260" x2="25%" y2="330" marker-end="url(#arrow-c)" />
+        <!-- File to Execution -->
+        <line class="flow-line line-c-2" x1="25%" y1="410" x2="25%" y2="470" marker-end="url(#arrow-c2)" />
+
+        <!-- Interpreter Track Lines (3 Nodes = 2 Lines) -->
+        <!-- Source to Interpreter -->
+        <line class="flow-line line-i-1" x1="75%" y1="130" x2="75%" y2="250" marker-end="url(#arrow-i)" />
+        <!-- Interpreter to Execution -->
+        <line class="flow-line line-i-2" x1="75%" y1="320" x2="75%" y2="410" marker-end="url(#arrow-i2)" />
+      </svg>
+
+      <!-- LEFT TRACK: COMPILER -->
+      <div class="track track-compiler">
+        <div class="track-title">Compiler Workflow</div>
+
+        <!-- Node 1: Source -->
+        <div class="node node-src">
+          <div class="node-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+          </div>
+          <div class="node-title">Source Code</div>
+          <div class="node-desc">Program.java</div>
+        </div>
+
+        <div class="packet packet-bulk" id="pkt-c-1" style="top: 130px;">Entire File</div>
+
+        <!-- Node 2: Compiler -->
+        <div class="node node-trans" style="margin-bottom: 2rem;">
+          <div class="node-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path></svg>
+          </div>
+          <div class="node-title">Compiler Process</div>
+        </div>
+
+        <!-- Node 3: Generated Executable (Unique to Compiler) -->
+        <div class="node node-file" style="margin-bottom: 2rem;">
+          <div class="node-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          </div>
+          <div class="node-title">Generated File</div>
+          <div class="node-desc">Program.class / .exe</div>
+        </div>
+
+        <div class="packet packet-bulk" id="pkt-c-2" style="top: 410px;">Load File</div>
+
+        <!-- Node 4: CPU Execution -->
+        <div class="node node-exe">
+          <div class="node-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+          </div>
+          <div class="node-title">Direct CPU Execution</div>
+          <div class="node-desc">Runs independently</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- RIGHT TRACK: INTERPRETER -->
+      <div class="track track-interpreter">
+        <div class="track-title">Interpreter Workflow</div>
+
+        <!-- Node 1: Source -->
+        <div class="node node-src" style="margin-bottom: 4rem;">
+          <div class="node-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+          </div>
+          <div class="node-title">Source Code</div>
+          <div class="node-desc">Script (.py)</div>
+        </div>
+
+        <div class="packet packet-line" id="pkt-i-1" style="top: 130px;">Read Line 1</div>
+        <div class="packet packet-line" id="pkt-i-3" style="top: 130px;">Read Line 2</div>
+
+        <!-- Node 2: Interpreter (No File Generated) -->
+        <div class="node node-trans" style="margin-bottom: 4rem;">
+          <div class="node-icon">
+            <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+          </div>
+          <div class="node-title">Interpreter Runtime</div>
+          <div class="node-desc">Translates line directly to CPU</div>
+        </div>
+
+        <div class="packet packet-line" id="pkt-i-2" style="top: 320px;">Execute Line 1</div>
+        <div class="packet packet-line" id="pkt-i-4" style="top: 320px;">Execute Line 2</div>
+
+        <!-- Node 3: Execution -->
+        <div class="node node-exe">
+          <div class="node-icon">
+            <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+          </div>
+          <div class="node-title">Instant Action</div>
+          <div class="node-desc">Executes immediately</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 0;
+  const maxStep = 3;
+
+  const phaseData = [
+    { phase: "Phase 0: Source Code", desc: "Both begin with human-readable text files." },
+    { phase: "Phase 1: Translation", desc: "Compiler converts the WHOLE file into a NEW executable file. Interpreter reads just Line 1." },
+    { phase: "Phase 2: Execution", desc: "Compiler runs the new executable. Interpreter executes Line 1 and loops back for Line 2." }
+  ];
+
+  function changeStep(direction) {
+    currentStep += direction;
+    if (currentStep < 0) currentStep = 0;
+
+    // Adjust step indexing to match 1-3 visually
+    let visualStep = currentStep;
+    if (visualStep === 0) visualStep = 1;
+    if (currentStep > 2) currentStep = 2; // Keep logic clamped
+
+    // Update UI Controls
+    document.getElementById('btnPrev').disabled = (currentStep === 0);
+    document.getElementById('btnNext').disabled = (currentStep === 2);
+
+    document.getElementById('stepCounter').innerText = phaseData[currentStep].phase;
+    document.getElementById('stepDesc').innerText = phaseData[currentStep].desc;
+
+    // Update Canvas State Class
+    const canvas = document.getElementById('canvasContainer');
+    canvas.classList.remove('state-0', 'state-1', 'state-2', 'state-3');
+    canvas.classList.add(`state-${currentStep + 1}`);
+  }
+</script>
+</body>
+</html>

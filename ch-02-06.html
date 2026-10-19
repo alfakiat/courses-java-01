@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Laboratory Task | Chapter 2</title><link rel="stylesheet" href="chapter-02.css"><link rel="stylesheet" href="chapter-navigation.css"><script src="chapter-02.js" defer></script></head>
+<body><main class="container"><a class="nav-back" href="index.html#ch-02">← Back to Chapter 2 slides</a><nav class="chapter-navigation" aria-label="Chapter 2 slide navigation"><a href="ch-02-05.html" rel="prev">← Previous: ch-02-05</a><span class="chapter-progress">Slide 6 · Part 1 of 2</span><a href="ch-02-07.html" rel="next">Next: Part 2 →</a></nav><header class="card hero"><span class="eyebrow">CHAPTER TWO · 06 / 06</span><h1>Laboratory Task</h1><p>Put your new skills together: reproduce a retail receipt using Java console output.</p></header><section class="grid two"><article class="card"><span class="eyebrow">YOUR CHALLENGE</span><h2>Retail Billing System</h2><p>Create <code>RetailBill.java</code> and print the receipt exactly as shown. Use the standard main method and <code>System.out.println</code>.</p><ol class="steps"><li>Declare a public class named <code>RetailBill</code>.</li><li>Add the main entry point.</li><li>Print all six lines, preserving spaces, punctuation, and dollar signs.</li><li>Compile with <code>javac RetailBill.java</code>, then run <code>java RetailBill</code>.</li></ol><p class="note">For this exercise, print the provided totals as text. Tax is 16% of $150.00: $24.00.</p></article><article class="card"><span class="eyebrow">EXPECTED OUTPUT</span><div class="editor-bar">● ● ● <span>RetailBill · console</span></div><pre class="terminal receipt">====================
+Item: 27-inch Display Monitor
+Subtotal: $150.00
+Tax (16%): $24.00
+Grand Total: $174.00
+====================</pre><p>Six lines. One complete receipt.</p></article></section><details class="card"><summary>Reveal a sample solution</summary><pre class="editor">public class RetailBill {
+    public static void main(String[] args) {
+        System.out.println(&quot;====================&quot;);
+        System.out.println(&quot;Item: 27-inch Display Monitor&quot;);
+        System.out.println(&quot;Subtotal: $150.00&quot;);
+        System.out.println(&quot;Tax (16%): $24.00&quot;);
+        System.out.println(&quot;Grand Total: $174.00&quot;);
+        System.out.println(&quot;====================&quot;);
+    }
+}</pre></details><a class="callout" href="ch-02-07.html"><strong>Continue to Part 2</strong><span>Data Types &amp; Variables →</span></a><footer>Java Fundamentals <span>WISE University · Chapter 2</span></footer></main></body></html>

@@ -1,0 +1,27 @@
+.chapter-navigation {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: var(--card-bg, #fff);
+    border: 1px solid var(--border-color, #e3e8ee);
+    border-radius: 16px;
+}
+.chapter-navigation a {
+    color: var(--primary-color, #0070f3);
+    font-weight: 600;
+    padding: .5rem;
+    text-underline-offset: .2em;
+}
+.chapter-navigation a:hover { text-decoration: none; }
+.chapter-navigation a:focus-visible {
+    outline: 3px solid var(--primary-color, #0070f3);
+    outline-offset: 3px;
+}
+.chapter-progress { color: var(--text-muted, #697386); }
+@media (max-width: 480px) {
+    .chapter-progress { flex-basis: 100%; order: -1; text-align: center; }
+}

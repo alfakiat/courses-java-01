@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>exercise-02-01 | Java Identifier Syntax</title>
+    <style>
+        :root { color-scheme: light; --ink:#1a1f36; --muted:#526077; --blue:#0064d9; --line:#dbe2ec; }
+        * { box-sizing:border-box; }
+        body { margin:0; background:#f8f9fa; color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+        main { min-height:100svh; padding:clamp(20px,3vw,40px); display:flex; flex-direction:column; gap:20px; }
+        a { color:var(--blue); text-underline-offset:4px; }
+        .topbar,.heading,.controls { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:16px; }
+        .topbar,.controls { color:var(--muted); font-size:15px; }
+        .eyebrow { color:var(--blue); font-size:14px; font-weight:750; letter-spacing:.08em; text-transform:uppercase; }
+        h1 { margin:8px 0; font-size:clamp(28px,3.4vw,48px); line-height:1.15; letter-spacing:-.035em; }
+        .intro { color:var(--muted); font-size:clamp(18px,1.6vw,23px); margin:8px 0 0; }
+        button { font:inherit; cursor:pointer; }
+        .reset,.close { padding:12px 20px; border:1px solid var(--line); border-radius:12px; background:white; color:var(--ink); font-weight:650; }
+        .examples { flex:1; display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:20px; }
+        .example { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:14px; min-height:140px; padding:24px 12px; background:white; border:2px solid var(--line); border-radius:20px; color:var(--ink); }
+        .example:hover { border-color:var(--blue); box-shadow:0 6px 20px #0064d912; }
+        code { font-family:ui-monospace,SFMono-Regular,Consolas,monospace; overflow-wrap:anywhere; }
+        .example code { font-size:clamp(22px,2.4vw,38px); font-weight:700; }
+        .badge { font-size:18px; font-weight:750; }
+        .example[data-result="true"] { background:#ecfdf5; border-color:#87cdb1; color:#086343; }
+        .example[data-result="false"] { background:#fff1f2; border-color:#e6a5ae; color:#ad233c; }
+        dialog { width:min(660px,calc(100% - 32px)); max-height:calc(100svh - 32px); overflow:auto; margin:auto; border:1px solid var(--line); border-radius:24px; padding:clamp(24px,4vw,48px); color:var(--ink); text-align:center; }
+        dialog::backdrop { background:#111b32b8; backdrop-filter:blur(5px); }
+        dialog h2 { margin:20px 0; font-size:clamp(28px,4vw,42px); }
+        .selected-name { display:block; margin:24px 0; font-size:clamp(32px,5vw,54px); font-weight:750; }
+        dialog p { font-size:22px; line-height:1.5; }
+        .choices { display:flex; gap:16px; margin-top:28px; }
+        .choices button { flex:1; border:2px solid var(--blue); color:var(--blue); background:#eef5ff; padding:20px; border-radius:14px; font-size:28px; font-weight:750; }
+        .choices button:disabled { cursor:default; opacity:.5; }
+        .choices button[aria-pressed="true"] { opacity:1; background:var(--blue); color:white; }
+        #feedback { border-top:1px solid var(--line); margin-top:24px; padding-top:20px; }
+        #verdict { font-size:28px; font-weight:750; }
+        #feedback[data-correct="true"] #verdict { color:#086343; }
+        #feedback[data-correct="false"] #verdict { color:#ad233c; }
+        .close { margin-top:20px; }
+        :focus-visible { outline:4px solid var(--blue); outline-offset:4px; }
+        @media(max-width:1000px) { .examples { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+        @media(max-width:650px) { .examples { grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; } .example { min-height:120px; } }
+    </style>
+</head>
+<body>
+<main>
+    <nav class="topbar" aria-label="Course navigation"><a href="index.html#ch-02">← Course home</a><span>WISE University · Java Fundamentals</span></nav>
+    <header>
+        <div class="heading"><div><span class="eyebrow">exercise-02-01 · Class discussion</span><h1>Identifier syntax: true or false?</h1></div><button class="reset" id="reset" type="button">Reset answers</button></div>
+        <p class="intro">Is each name a valid Java identifier? Click a name, then choose True or False. Check syntax only.</p>
+    </header>
+    <section class="examples" id="examples" aria-label="Java identifier examples"></section>
+    <footer class="controls"><span id="progress" role="status">0 of 12 names answered</span><a href="ch-02-04.html">Review naming rules →</a></footer>
+    <noscript><p>Please enable JavaScript to display and reveal the examples.</p></noscript>
+</main>
+<dialog id="question" aria-labelledby="question-title" aria-describedby="question-rule">
+    <span class="eyebrow">Your turn</span>
+    <h2 id="question-title">Is this a valid Java identifier?</h2>
+    <code class="selected-name" id="selected-name"></code>
+    <div class="choices" role="group" aria-label="Choose your answer">
+        <button type="button" id="choose-true" aria-pressed="false">True</button>
+        <button type="button" id="choose-false" aria-pressed="false">False</button>
+    </div>
+    <div id="feedback" hidden aria-live="polite" aria-atomic="true"><div id="verdict"></div><p id="reason"></p></div>
+    <form method="dialog"><button class="close">Back to words</button></form>
+</dialog>
+<script>
+    const examples = [
+        { name:'studentAge', kind:'Identifier', valid:true, reason:'Letters are allowed in a Java identifier.' },
+        { name:'student_age', kind:'Identifier', valid:true, reason:'Underscores are allowed within a Java identifier.' },
+        { name:'StudentProfile', kind:'Identifier', valid:true, reason:'Uppercase and lowercase letters are both allowed.' },
+        { name:'2students', kind:'Identifier', valid:false, reason:'An identifier cannot begin with a digit.', better:'students2' },
+        { name:'MAX_SIZE', kind:'Identifier', valid:true, reason:'Uppercase letters and underscores are allowed.' },
+        { name:'studentProfile', kind:'Identifier', valid:true, reason:'Starting with a lowercase letter is valid Java syntax.' },
+        { name:'$total', kind:'Identifier', valid:true, reason:'A dollar sign is allowed at the beginning of a Java identifier.' },
+        { name:'maxSize', kind:'Identifier', valid:true, reason:'Mixed uppercase and lowercase letters are allowed.' },
+        { name:'first name', kind:'Identifier', valid:false, reason:'Spaces cannot be part of a Java identifier.', better:'firstName' },
+        { name:'class', kind:'Identifier', valid:false, reason:'class is a reserved Java keyword and cannot be used as an identifier.', better:'className' },
+        { name:'student2', kind:'Identifier', valid:true, reason:'Digits are allowed after the first character.' },
+        { name:'first-name', kind:'Identifier', valid:false, reason:'A hyphen is the subtraction operator, so it cannot be part of an identifier.', better:'firstName' }
+    ];
+    const grid = document.getElementById('examples');
+    const dialog = document.getElementById('question');
+    const feedback = document.getElementById('feedback');
+    const trueButton = document.getElementById('choose-true');
+    const falseButton = document.getElementById('choose-false');
+    const answers = new Map();
+    const buttons = [];
+    let selectedIndex = null;
+
+    function showFeedback(choice) {
+        const example = examples[selectedIndex];
+        feedback.hidden = false;
+        feedback.dataset.correct = String(choice === example.valid);
+        document.getElementById('verdict').textContent = `${choice === example.valid ? 'Correct!' : 'Try the rule again.'} Answer: ${example.valid ? 'True' : 'False'}`;
+        document.getElementById('reason').textContent = example.reason + (example.better ? ` Use: ${example.better}` : '');
+        [trueButton, falseButton].forEach((button, index) => {
+            button.disabled = true;
+            button.setAttribute('aria-pressed', String(choice === (index === 0)));
+        });
+    }
+
+    examples.forEach((example, index) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'example';
+        button.setAttribute('aria-haspopup', 'dialog');
+        button.setAttribute('aria-controls', 'question');
+        const name = document.createElement('code');
+        name.textContent = example.name;
+        const badge = document.createElement('span');
+        badge.className = 'badge';
+        badge.hidden = true;
+        button.append(name, badge);
+        button.addEventListener('click', () => {
+            selectedIndex = index;
+            document.getElementById('selected-name').textContent = example.name;
+            feedback.hidden = true;
+            [trueButton, falseButton].forEach(choice => {
+                choice.disabled = false;
+                choice.setAttribute('aria-pressed', 'false');
+            });
+            if (answers.has(index)) showFeedback(answers.get(index));
+            dialog.showModal();
+        });
+        buttons.push(button);
+        grid.append(button);
+    });
+
+    function submitAnswer(choice) {
+        if (selectedIndex === null || answers.has(selectedIndex)) return;
+        answers.set(selectedIndex, choice);
+        const example = examples[selectedIndex];
+        const button = buttons[selectedIndex];
+        button.dataset.result = String(example.valid);
+        button.children[1].hidden = false;
+        button.children[1].textContent = example.valid ? '✓ True' : '✕ False';
+        button.setAttribute('aria-label', `${example.name}: ${example.valid ? 'True' : 'False'}. Review answer`);
+        showFeedback(choice);
+        document.getElementById('progress').textContent = `${answers.size} of ${examples.length} names answered`;
+    }
+    trueButton.addEventListener('click', () => submitAnswer(true));
+    falseButton.addEventListener('click', () => submitAnswer(false));
+    document.getElementById('reset').addEventListener('click', () => {
+        answers.clear();
+        selectedIndex = null;
+        buttons.forEach(button => {
+            delete button.dataset.result;
+            button.children[1].hidden = true;
+            button.removeAttribute('aria-label');
+        });
+        document.getElementById('progress').textContent = `0 of ${examples.length} names answered`;
+    });
+</script>
+</body>
+</html>

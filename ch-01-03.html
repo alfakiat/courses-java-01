@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Objective 3: Computer Languages</title>
+  <style>
+    /* Modern Workspace CSS Variables */
+    :root {
+      --workspace-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #1a1f36;
+      --text-muted: #697386;
+      --border-color: #e3e8ee;
+      --primary-color: #0070f3;
+      --primary-hover: #0056b3;
+      --primary-soft: #e5f0ff;
+      --success-color: #10b981;
+      --success-soft: #ecfdf5;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --danger-soft: #fef2f2;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--workspace-bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--primary-color); }
+
+    .bento-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-top { grid-template-columns: 1fr; }
+    @media (min-width: 768px) { .grid-top { grid-template-columns: 1.5fr 1fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Control Panel */
+    .control-panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--workspace-bg);
+      padding: 0.5rem 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .step-indicator {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 170px;
+      text-align: center;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .btn-ctrl {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ctrl:hover:not(:disabled) {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-ctrl:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: transparent;
+    }
+
+    .btn-ctrl.primary {
+      background-color: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .btn-ctrl.primary:hover:not(:disabled) {
+      background-color: var(--primary-hover);
+    }
+
+    /* Inspector & Graph Layout */
+    .inspector-layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+    }
+    @media (min-width: 992px) { .inspector-layout { grid-template-columns: 1.3fr 1fr; } }
+
+    /* Left Side: Code Editor & Metrics */
+    .left-panel {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .code-window {
+      background: #1e1e1e;
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 250px;
+      border: 1px solid var(--border-color);
+      position: relative;
+    }
+
+    .code-header {
+      background: #2d2d2d;
+      padding: 0.75rem 1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .mac-btn { width: 12px; height: 12px; border-radius: 50%; }
+    .mac-red { background: #ff5f56; }
+    .mac-yellow { background: #ffbd2e; }
+    .mac-green { background: #27c93f; }
+
+    .code-title {
+      color: #858585;
+      font-size: 0.85rem;
+      font-family: monospace;
+      margin-left: 1rem;
+      transition: color 0.3s;
+    }
+
+    .code-body {
+      padding: 1.5rem;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 1.25rem;
+      color: #d4d4d4;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      position: relative;
+    }
+
+    .syntax-layer {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.4s ease;
+      pointer-events: none;
+    }
+
+    .hl-bin { color: #569cd6; font-weight: bold; letter-spacing: 2px; }
+    .hl-asm-cmd { color: #c586c0; font-weight: bold; }
+    .hl-asm-reg { color: #9cdcfe; }
+    .hl-asm-val { color: #b5cea8; }
+    .hl-high-var { color: #9cdcfe; }
+    .hl-high-op { color: #d4d4d4; }
+    .hl-high-num { color: #b5cea8; }
+
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 1rem;
+    }
+
+    .metric-card {
+      background: var(--workspace-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.3s ease;
+    }
+
+    .metric-header {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.5rem;
+    }
+
+    .metric-value {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text-main);
+      transition: color 0.3s ease;
+    }
+
+    /* Right Side: CPU Abstraction Graph */
+    .cpu-graph-container {
+      background: var(--workspace-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-end;
+      min-height: 400px;
+      position: relative;
+    }
+
+    .graph-layer {
+      width: 100%;
+      background: var(--card-bg);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 1rem;
+      text-align: center;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      z-index: 2;
+    }
+
+    .graph-arrow {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin: 0.5rem 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      opacity: 0.5;
+      transition: all 0.4s ease;
+    }
+
+    .graph-arrow::after {
+      content: '↓';
+      font-size: 1.25rem;
+      margin-top: 0.25rem;
+    }
+
+    /* Hardware Core */
+    .hardware-core {
+      margin-top: 1rem;
+      width: 100px;
+      height: 100px;
+      background: #e3e8ee;
+      border-radius: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-main);
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: 4px solid #cbd5e1;
+      transition: all 0.4s ease;
+      z-index: 2;
+    }
+
+    .hardware-core svg {
+      width: 40px;
+      height: 40px;
+      margin-bottom: 0.5rem;
+      color: #64748b;
+      transition: all 0.4s ease;
+    }
+
+    /* =========================================
+       STATE MACHINE CSS
+       ========================================= */
+
+    /* STATE 1: MACHINE LANGUAGE */
+    .state-1 .code-title { color: var(--danger-color); }
+    .state-1 #code-machine { opacity: 1; transform: translateY(0); }
+    .state-1 #metric-readability { color: var(--danger-color); }
+    .state-1 #metric-hardware { color: var(--warning-color); }
+
+    .state-1 #layer-1 { border-color: var(--danger-color); box-shadow: 0 0 0 4px var(--danger-soft); color: var(--danger-color); transform: scale(1.05); }
+    .state-1 #arrow-1 { color: var(--danger-color); opacity: 1; transform: translateY(3px); }
+    .state-1 .hardware-core { border-color: var(--danger-color); background: var(--danger-soft); }
+    .state-1 .hardware-core svg { color: var(--danger-color); transform: scale(1.1); }
+
+    /* STATE 2: ASSEMBLY LANGUAGE */
+    .state-2 .code-title { color: var(--warning-color); }
+    .state-2 #code-assembly { opacity: 1; transform: translateY(0); }
+    .state-2 #metric-readability { color: var(--warning-color); }
+    .state-2 #metric-hardware { color: var(--warning-color); }
+
+    .state-2 #layer-2 { border-color: var(--warning-color); box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2); color: var(--warning-color); transform: scale(1.05); }
+    .state-2 #arrow-2 { color: var(--warning-color); opacity: 1; transform: translateY(3px); }
+
+    /* STATE 3: HIGH-LEVEL LANGUAGE */
+    .state-3 .code-title { color: var(--success-color); }
+    .state-3 #code-high { opacity: 1; transform: translateY(0); }
+    .state-3 #metric-readability { color: var(--success-color); }
+    .state-3 #metric-hardware { color: var(--success-color); }
+
+    .state-3 #layer-3 { border-color: var(--success-color); box-shadow: 0 0 0 4px var(--success-soft); color: var(--success-color); transform: scale(1.05); }
+    .state-3 #arrow-3 { color: var(--success-color); opacity: 1; transform: translateY(3px); }
+
+  </style>
+  <link rel="stylesheet" href="chapter-navigation.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation -->
+  <a href="index.html#ch-01" class="nav-back">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    Back to Chapter 1 slides
+  </a>
+    <nav class="chapter-navigation" aria-label="Chapter 1 slide navigation">
+        <a href="ch-01-02.html" rel="prev">← Previous: ch-01-02</a>
+        <span class="chapter-progress">Slide 3 of 5</span>
+        <a href="ch-01-04.html" rel="next">Next: ch-01-04 →</a>
+    </nav>
+
+  <!-- Top Bento Grid -->
+  <div class="bento-grid grid-top">
+    <div class="card">
+      <span class="eyebrow">Concept 3.1</span>
+      <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">Computer Languages</h1>
+      <p style="color: var(--text-muted); margin-bottom: 1rem;">
+        Programming languages are categorized into three main levels based on how close they are to the hardware versus how close they are to human language.
+      </p>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <span class="eyebrow">Instructor Note</span>
+      <p style="font-size: 0.95rem; color: var(--text-main); margin-top: 0.5rem; line-height: 1.6;">
+        Cycle through the language levels to show how programming evolved from hardware-dependent binary codes to abstract, human-readable instructions.
+      </p>
+    </div>
+  </div>
+
+  <!-- Interactive Diagram -->
+  <div class="card">
+
+    <!-- Step Control Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="eyebrow">Language Abstraction</span>
+        <h3 style="font-size: 1.25rem;">Interactive Code & Hardware Graph</h3>
+      </div>
+
+      <div class="control-panel">
+        <button class="btn-ctrl" id="btnPrev" onclick="changeStep(-1)" disabled>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          Level Down
+        </button>
+
+        <div class="step-indicator">
+          <span id="stepCounter">Language Level</span>
+          <span class="step-desc" id="stepDesc">Select a level</span>
+        </div>
+
+        <button class="btn-ctrl primary" id="btnNext" onclick="changeStep(1)">
+          Level Up
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Inspector State Machine Container -->
+    <div class="inspector-layout state-0" id="canvasContainer">
+
+      <!-- Left Panel: Code Editor & Metrics -->
+      <div class="left-panel">
+        <div class="code-window">
+          <div class="code-header">
+            <div class="mac-btn mac-red"></div>
+            <div class="mac-btn mac-yellow"></div>
+            <div class="mac-btn mac-green"></div>
+            <span class="code-title" id="editorTitle">awaiting_input...</span>
+          </div>
+          <div class="code-body">
+
+            <!-- Layer 1: Machine Language -->
+            <div class="syntax-layer" id="code-machine">
+              <div class="hl-bin">10110000 01100001</div>
+              <div class="hl-bin">00000101 00000000</div>
+              <div class="hl-bin">10000011 11000000</div>
+              <div class="hl-bin">00000011 00000000</div>
+            </div>
+
+            <!-- Layer 2: Assembly Language -->
+            <div class="syntax-layer" id="code-assembly">
+              <div><span class="hl-asm-cmd">MOV</span> <span class="hl-asm-reg">X</span>, <span class="hl-asm-val">5</span></div>
+              <div><span class="hl-asm-cmd">ADD</span> <span class="hl-asm-reg">X</span>, <span class="hl-asm-val">3</span></div>
+              <div style="color:#6a9955; font-size:0.9rem; margin-top:1rem;">; Uses mnemonics instead of binary</div>
+            </div>
+
+            <!-- Layer 3: High-Level Language -->
+            <div class="syntax-layer" id="code-high">
+              <div><span class="hl-high-var">area</span> <span class="hl-high-op">=</span> <span class="hl-high-num">5</span> <span class="hl-high-op">*</span> <span class="hl-high-num">3.1415</span><span class="hl-high-op">;</span></div>
+              <div style="color:#6a9955; font-size:0.9rem; margin-top:1rem;">// Closer to human language and math</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metrics -->
+        <div class="metrics-grid">
+          <div class="metric-card">
+            <div class="metric-header">Readability</div>
+            <div class="metric-value" id="metric-readability">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-header">Hardware Link</div>
+            <div class="metric-value" id="metric-hardware">--</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-header">Translation</div>
+            <div class="metric-value" id="metric-translation">--</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: CPU Abstraction Graph -->
+      <div class="cpu-graph-container">
+
+        <!-- Level 3 -->
+        <div class="graph-layer" id="layer-3" style="width: 100%;">
+          High-Level Language (Human)
+        </div>
+
+        <div class="graph-arrow" id="arrow-3">Compiler / Interpreter</div>
+
+        <!-- Level 2 -->
+        <div class="graph-layer" id="layer-2" style="width: 85%;">
+          Assembly Language
+        </div>
+
+        <div class="graph-arrow" id="arrow-2">Assembler</div>
+
+        <!-- Level 1 -->
+        <div class="graph-layer" id="layer-1" style="width: 70%;">
+          Machine Language (Binary)
+        </div>
+
+        <div class="graph-arrow" id="arrow-1">Direct Execution</div>
+
+        <!-- Hardware Base -->
+        <div class="hardware-core">
+          <!-- CPU Icon -->
+          <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path>
+          </svg>
+          CPU
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 0;
+  const maxStep = 3;
+
+  const levelData = [
+    {
+      title: "awaiting_input...",
+      desc: "Select a level",
+      readability: "--",
+      hardware: "--",
+      translation: "--"
+    },
+    {
+      title: "Machine Language (Low-Level)",
+      desc: "Direct execution by the hardware",
+      readability: "Very Difficult",
+      hardware: "Processor Specific",
+      translation: "None"
+    },
+    {
+      title: "Assembly Language (Low-Level)",
+      desc: "Mnemonics abstract the binary",
+      readability: "Moderate",
+      hardware: "Architecture Specific",
+      translation: "Assembler"
+    },
+    {
+      title: "High-Level Language (Java, Python)",
+      desc: "Human-readable logical syntax",
+      readability: "Easy",
+      hardware: "Platform Independent",
+      translation: "Compiler/Interpreter"
+    }
+  ];
+
+  function changeStep(direction) {
+    // Update Step Variable
+    currentStep += direction;
+    if (currentStep < 1) currentStep = 1; // Force start at step 1 after initial click
+    if (currentStep > maxStep) currentStep = maxStep;
+
+    // Update UI Controls
+    document.getElementById('btnPrev').disabled = (currentStep === 1);
+    document.getElementById('btnNext').disabled = (currentStep === maxStep);
+
+    document.getElementById('stepCounter').innerText = `Level ${currentStep} of ${maxStep}`;
+    document.getElementById('stepDesc').innerText = levelData[currentStep].desc;
+
+    // Update Metrics Data
+    document.getElementById('editorTitle').innerText = levelData[currentStep].title;
+    document.getElementById('metric-readability').innerText = levelData[currentStep].readability;
+    document.getElementById('metric-hardware').innerText = levelData[currentStep].hardware;
+    document.getElementById('metric-translation').innerText = levelData[currentStep].translation;
+
+    // Update Canvas State Class
+    const canvas = document.getElementById('canvasContainer');
+    canvas.classList.remove('state-0', 'state-1', 'state-2', 'state-3');
+    canvas.classList.add(`state-${currentStep}`);
+  }
+</script>
+</body>
+</html>

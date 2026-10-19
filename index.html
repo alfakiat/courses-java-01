@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fundamentals of Java Programming | WISE University</title>
+    <style>
+        /* 1. Standard CSS Variables Palette */
+        :root {
+            --workspace-bg: #f8f9fa; /* Overall page background */
+            --card-bg: #ffffff;      /* Component/Card background */
+            --text-main: #1a1f36;    /* High-contrast ink */
+            --text-muted: #697386;   /* Secondary text */
+            --border-color: #e3e8ee; /* Clean, subtle dividers */
+            --primary-color: #0070f3;/* Brand action color */
+            --primary-hover: #0056b3;
+            --primary-soft: #e5f0ff; /* Light blue for active states */
+            --success-color: #10b981;
+            --success-soft: #ecfdf5; /* Light green for completed states */
+            --warning-color: #b7791f;
+            --locked-bg: #f9fafb;
+            --text-disabled: #9ca3af;
+            --button-text: #ffffff;
+            --transparent: transparent;
+            --radius-lg: 24px;       /* Large outer containers */
+            --radius-md: 16px;       /* Inner elements/images */
+            --shadow-soft: 0 4px 20px rgba(0,0,0,0.04);
+        }
+
+        /* 2. Typography & Hierarchy */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--workspace-bg);
+            font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+            color: var(--text-main);
+            line-height: 1.5;
+            padding: 2rem 1rem;
+        }
+
+        /* Core Layout: Constrained Width */
+        .container {
+            max-width: 1024px;
+            margin: 0 auto;
+        }
+
+        .eyebrow {
+            font-size: 12px;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 0.5rem;
+            display: block;
+        }
+
+        /* Bento Grid Layout */
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .bento-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-soft);
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            color: var(--text-main);
+        }
+
+        .card-description {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+
+        /* Action Buttons & Real Estate */
+        .actions-group {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            font-family: inherit;
+            font-size: 0.95rem;
+            font-weight: 600;
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--button-text);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* The "Icon Button" Rule */
+        .btn-icon {
+            background-color: var(--transparent);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            position: relative;
+        }
+
+        .btn-icon:hover {
+            background-color: var(--workspace-bg);
+            color: var(--text-main);
+        }
+
+        .btn-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Component States for Lists */
+        .module-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .module-item {
+            display: flex;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+            gap: 1rem;
+            transition: transform 0.2s ease;
+        }
+
+        .module-item:hover {
+            transform: translateY(-2px);
+        }
+
+        .module-title { font-weight: 600; font-size: 1rem; }
+        a.module-item:hover { background: var(--workspace-bg); border-color: var(--primary-color); }
+        .course-header { display: flex; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; color: var(--text-muted); font-size: .875rem; }
+        .university { font-weight: 700; color: var(--text-main); }
+        h1.card-title { font-size: clamp(1.8rem, 4vw, 2.5rem); line-height: 1.15; letter-spacing: -.035em; }
+        .curriculum-title { margin-bottom: 1.5rem; font-size: 1.25rem; }
+        .module-item { text-decoration: none; color: inherit; }
+        .chapter-slides { margin: 1rem 0 0 2rem; padding-left: 1rem; }
+        .chapter-slides li + li { margin-top: .5rem; }
+        .chapter-slides a { color: var(--primary-color); text-underline-offset: .2em; }
+        .module-content { min-width: 0; }
+        .module-icon { flex-shrink: 0; }
+        .btn-primary { gap: .75rem; }
+        :focus-visible { outline: 3px solid var(--primary-color); outline-offset: 4px; }
+        dialog { width: min(420px, calc(100% - 2rem)); margin: auto; color: var(--text-main); }
+        dialog::backdrop { background: var(--text-main); opacity: .35; }
+        .settings-option { display: flex; align-items: center; gap: .75rem; margin: 1.5rem 0; }
+        body.large-text { font-size: 18px; }
+        body.large-text .module-title { font-size: 1.125rem; }
+        @media (max-width: 480px) {
+            body { padding: 1.25rem 1rem; }
+            .card { padding: 1.5rem; }
+            .course-header { flex-direction: column; gap: .25rem; }
+            .actions-group { flex-wrap: wrap; }
+            .module-item { padding: 1rem; }
+        }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <header class="course-header"><span class="university">WISE University</span><span class="semester">Winter semester 2027/2026</span></header>
+
+    <!-- Bento Grid Top Section -->
+    <div class="bento-grid">
+
+        <!-- Main Hero Card -->
+        <div class="card">
+            <span class="eyebrow">WISE University · Computer Programming</span>
+            <h1 class="card-title">Fundamentals of Java Programming</h1>
+            <p class="card-description">Build a strong foundation in Java: write your first program, work with variables and control flow, and solve problems with methods and objects.</p>
+
+            <div class="actions-group">
+                <!-- Primary Call to Action -->
+                <a class="btn btn-primary" href="ch-01-01.html">Start Course <span aria-hidden="true">→</span></a>
+
+                <!-- Secondary Action (Icon Button Rule) -->
+                <button class="btn btn-icon" id="download-syllabus" type="button" title="Download Syllabus" aria-label="Download syllabus">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                    </svg>
+                </button>
+                <!-- Additional Icon Action -->
+                <button class="btn btn-icon" id="settings-button" type="button" title="Settings" aria-label="Open course settings">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+
+    </div>
+
+    <!-- Course chapters -->
+    <div class="card">
+        <span class="eyebrow">Curriculum</span>
+        <h2 class="curriculum-title">Course Chapters</h2>
+
+        <div class="module-list">
+            <section id="ch-01" aria-label="Chapter 1 slides">
+                <a class="module-item" href="ch-01-01.html"><span class="module-title">Chapter 1: Introduction to Computers, Programs, and Java</span></a>
+                <ol class="chapter-slides">
+                    <li><a href="ch-01-01.html">ch-01-01: Computer Architecture</a></li>
+                    <li><a href="ch-01-02.html">ch-01-02: Fundamentals of Programming</a></li>
+                    <li><a href="ch-01-03.html">ch-01-03: Computer Languages</a></li>
+                    <li><a href="ch-01-04.html">ch-01-04: Compilers vs. Interpreters</a></li>
+                    <li><a href="ch-01-05.html">ch-01-05: The Java Language Overview</a></li>
+                </ol>
+            </section>
+            <section id="ch-02" aria-label="Chapter 2 slides">
+                <a class="module-item" href="ch-02-01.html"><span class="module-title">Chapter 2: Java Fundamentals</span></a>
+                <ol class="chapter-slides">
+                    <li><a href="ch-02-01.html">ch-02-01: Java Fundamentals</a></li>
+                    <li><a href="ch-02-02.html">ch-02-02: The Platform Stack</a></li>
+                    <li><a href="ch-02-03.html">ch-02-03: Syntax Structure &amp; Comments</a></li>
+                    <li><a href="ch-02-04.html">ch-02-04: Identifiers &amp; Naming Conventions</a></li>
+                    <li><a href="ch-02-05.html">ch-02-05: Keywords &amp; Escape Sequences</a></li>
+                    <li><a href="ch-02-06.html">ch-02-06: Laboratory Task</a></li>
+                    <li><a href="exercise-02-01.html">exercise-02-01: Identifier Syntax — True or False?</a></li>
+                    <li><a href="exercise-02-02.html">exercise-02-02: Guess the Output — Escape Sequences</a></li>
+                    <li><a href="ch-02-07.html">ch-02-07: Part 2 — Data Types &amp; Memory Allocation</a></li>
+                    <li><a href="ch-02-08.html">ch-02-08: Part 2 — The 8 Primitive Data Types</a></li>
+                    <li><a href="ch-02-09.html">ch-02-09: Part 2 — Reference Types</a></li>
+                    <li><a href="ch-02-10.html">ch-02-10: Part 2 — Variable Lifecycle &amp; Defaults</a></li>
+                </ol>
+            </section>
+            <a class="module-item" href="lesson.html?id=3"><span class="module-title">Chapter 3: Methods, Arrays &amp; Objects</span></a>
+            <div class="module-item"><span class="module-title">Chapter 4: Java Capstone Project</span></div>
+        </div>
+
+    </div>
+
+    <footer class="course-header" style="margin-top: 1.5rem; margin-bottom: 0;"><span>Fundamentals of Java Programming</span><span>WISE University · Winter 2027/2026</span></footer>
+</main>
+
+<dialog id="settings" class="card" aria-labelledby="settings-title">
+    <h2 id="settings-title">Course settings</h2>
+    <label class="settings-option"><input type="checkbox" id="large-text"> Larger reading text</label>
+    <form method="dialog"><button class="btn btn-primary">Done</button></form>
+</dialog>
+<script>
+    const settings = document.getElementById('settings');
+    document.getElementById('settings-button').addEventListener('click', () => settings.showModal());
+    document.getElementById('large-text').addEventListener('change', (event) => {
+        document.body.classList.toggle('large-text', event.target.checked);
+    });
+    document.getElementById('download-syllabus').addEventListener('click', () => {
+        const syllabus = [
+            'Fundamentals of Java Programming',
+            'WISE University | Winter semester 2027/2026',
+            '',
+            'Course outline',
+            '1. Introduction to Computers, Programs, and Java: computer architecture, programming languages, compilers, interpreters, and Java.',
+            '2. Java Fundamentals: core features, JVM/JRE/JDK, syntax, comments, identifiers, keywords, console output, and retail billing lab.',
+            '3. Methods, Arrays & Objects: methods, arrays, classes, objects, encapsulation.',
+            '4. Java Capstone Project: apply the fundamentals to a console application.'
+        ].join('\n');
+        const url = URL.createObjectURL(new Blob([syllabus], { type: 'text/plain;charset=utf-8' }));
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'WISE-Java-Syllabus-Winter-2027-2026.txt';
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+    });
+</script>
+</body>
+</html>

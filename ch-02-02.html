@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Platform Stack | Chapter 2</title>
+  <style>
+    /* Modern Workspace CSS Variables */
+    :root {
+      --workspace-bg: #f8f9fa;
+      --card-bg: #ffffff;
+      --text-main: #1a1f36;
+      --text-muted: #697386;
+      --border-color: #e3e8ee;
+      --primary-color: #0070f3; /* JVM Core */
+      --primary-hover: #0056b3;
+      --primary-soft: #e5f0ff;
+      --success-color: #10b981; /* JRE Layer */
+      --success-soft: #ecfdf5;
+      --warning-color: #f59e0b; /* JDK Layer */
+      --warning-soft: #fffbeb;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-soft: 0 4px 20px rgba(0,0,0,0.04);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--workspace-bg);
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--text-main);
+      line-height: 1.6;
+      padding: 2rem 1rem;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover { color: var(--primary-color); }
+
+    .bento-grid {
+      display: grid;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .grid-top { grid-template-columns: 1fr; }
+    @media (min-width: 768px) { .grid-top { grid-template-columns: 2fr 1fr; } }
+
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 2rem;
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* Control Panel */
+    .control-panel {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      background: var(--workspace-bg);
+      padding: 0.5rem 0.5rem;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+    }
+
+    .control-panel { flex-wrap: wrap; justify-content: center; }
+    @media (max-width: 600px) { .nested-canvas { padding: .5rem; } .box-jdk, .box-jre, .box-jvm { padding: 1rem; } .arch-header { white-space: normal; } .arch-content { flex-direction: column; } .state-2 .comp-libs, .state-3 .comp-libs, .state-3 .comp-tools { min-width: 0; width: 100%; } .state-1 .box-jvm { transform: none; } }
+    .step-indicator {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text-main);
+      min-width: 220px;
+      text-align: center;
+    }
+
+    .step-desc {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 0.25rem;
+    }
+
+    .btn-ctrl {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      background-color: var(--card-bg);
+      border: 1px solid var(--border-color);
+      color: var(--text-main);
+      font-weight: 600;
+      font-size: 0.9rem;
+      padding: 0.6rem 1rem;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-ctrl:hover:not(:disabled) {
+      border-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .btn-ctrl:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background-color: transparent;
+    }
+
+    .btn-ctrl.primary {
+      background-color: var(--text-main);
+      color: white;
+      border-color: var(--text-main);
+    }
+
+    .btn-ctrl.primary:hover:not(:disabled) {
+      background-color: #000;
+    }
+
+    /* Visualization Canvas */
+    .nested-canvas {
+      background: var(--workspace-bg);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      min-height: 540px;
+      margin-top: 1.5rem;
+      padding: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Nested Boxes Foundation */
+    .arch-box {
+      border-radius: var(--radius-md);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .arch-header {
+      font-weight: 800;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.4s ease;
+      white-space: nowrap;
+    }
+
+    .arch-content {
+      display: flex;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      transition: all 0.6s ease;
+    }
+
+    /* Base States (Hidden visually, but present in DOM so children show) */
+    .box-jdk {
+      background: transparent;
+      border: 3px dashed transparent;
+      padding: 2rem;
+      width: 100%;
+      max-width: 850px;
+    }
+
+    .box-jre {
+      background: transparent;
+      border: 3px solid transparent;
+      padding: 1.5rem;
+      flex: 2;
+    }
+
+    /* The JVM is ALWAYS visible */
+    .box-jvm {
+      background: var(--primary-soft);
+      border: 3px solid var(--primary-color);
+      padding: 2rem;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 112, 243, 0.2);
+    }
+    .box-jvm .arch-header { color: var(--primary-color); margin-bottom: 0.5rem; justify-content: center;}
+
+    /* Hide specific elements initially */
+    .header-jdk, .header-jre {
+      opacity: 0;
+      max-height: 0;
+      margin: 0;
+      overflow: hidden;
+    }
+
+    .comp-libs, .comp-tools {
+      opacity: 0;
+      flex: 0;
+      min-width: 0;
+      width: 0;
+      padding: 0;
+      margin: 0;
+      border: 0 solid transparent;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      background: var(--card-bg);
+      border-radius: var(--radius-md);
+      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      white-space: nowrap;
+    }
+
+    .comp-icon { margin-bottom: 0.75rem; }
+    .comp-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.25rem; color: var(--text-main); }
+    .comp-desc { font-size: 0.8rem; color: var(--text-muted); white-space: normal; }
+
+
+    /* =========================================
+       STATE MACHINE CSS
+       ========================================= */
+
+    /* STATE 1: JVM ONLY (Base state handles this) */
+    .state-1 .box-jvm { transform: scale(1.1); }
+
+    /* STATE 2: JRE (Adds Libraries & JRE Border) */
+    .state-2 .box-jvm, .state-3 .box-jvm { transform: scale(1); box-shadow: none; }
+
+    .state-2 .box-jre, .state-3 .box-jre {
+      background: var(--success-soft);
+      border-color: var(--success-color);
+      box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15);
+    }
+
+    .state-2 .header-jre, .state-3 .header-jre {
+      opacity: 1;
+      max-height: 50px;
+      margin-bottom: 1rem;
+      color: var(--success-color);
+    }
+
+    .state-2 .comp-libs, .state-3 .comp-libs {
+      opacity: 1;
+      flex: 1;
+      width: auto;
+      min-width: 180px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      border-bottom: 3px solid var(--success-color);
+      box-shadow: var(--shadow-soft);
+    }
+
+    /* STATE 3: JDK (Adds Tools & JDK Border) */
+    .state-3 .box-jre { box-shadow: none; }
+
+    .state-3 .box-jdk {
+      background: var(--warning-soft);
+      border-color: var(--warning-color);
+    }
+
+    .state-3 .header-jdk {
+      opacity: 1;
+      max-height: 50px;
+      margin-bottom: 1rem;
+      color: var(--warning-color);
+    }
+
+    .state-3 .comp-tools {
+      opacity: 1;
+      flex: 1;
+      width: auto;
+      min-width: 220px;
+      padding: 1.5rem;
+      border: 1px solid var(--border-color);
+      border-bottom: 3px solid var(--warning-color);
+      box-shadow: var(--shadow-soft);
+    }
+
+  </style>
+  <link rel="stylesheet" href="chapter-navigation.css">
+</head>
+<body>
+
+<div class="container">
+  <!-- Navigation -->
+  <a href="index.html#ch-02" class="nav-back">
+    <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    Back to Chapter 2 slides
+  </a>
+<nav class="chapter-navigation" aria-label="Chapter 2 slide navigation"><a href="ch-02-01.html" rel="prev">← Previous: ch-02-01</a><span class="chapter-progress">Slide 2 · Part 1 of 2</span><a href="ch-02-03.html" rel="next">Next: ch-02-03 →</a></nav>
+
+  <p style="margin-bottom:1.5rem; color:var(--text-muted)">The JRE is a traditional runtime concept. Modern JDKs include runtime components; a separate JRE distribution is not always provided.</p>
+  <!-- Top Bento Grid -->
+  <div class="bento-grid grid-top">
+    <div class="card">
+      <span class="eyebrow">Java Ecosystem</span>
+      <h1 style="font-size: 1.5rem; margin-bottom: 1rem;">The Platform Stack: JVM, JRE, and JDK</h1>
+      <p style="color: var(--text-muted); margin-bottom: 0;">
+        To understand how Java works, you must understand its three core components. They operate like nested boxes, each adding more functionality depending on whether you want to <strong>run</strong> a program or <strong>develop</strong> one.
+      </p>
+    </div>
+
+    <div class="card" style="display: flex; flex-direction: column; justify-content: center;">
+      <span class="eyebrow">Instructor Note</span>
+      <p style="font-size: 0.95rem; color: var(--text-main); margin-top: 0.5rem; line-height: 1.6;">
+        Use the control panel to build the Java architecture from the inside out. Emphasize the difference between a user who just needs to run Java, and a developer who needs to write it.
+      </p>
+    </div>
+  </div>
+
+  <!-- Interactive Diagram -->
+  <div class="card">
+
+    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+      <div>
+        <span class="eyebrow">Nested Architecture</span>
+        <h3 style="font-size: 1.25rem;">The Java Installation Hierarchy</h3>
+      </div>
+
+      <!-- Control Panel -->
+      <div class="control-panel">
+        <button class="btn-ctrl" id="btnPrev" onclick="changeStep(-1)" disabled>
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+          Back
+        </button>
+
+        <div class="step-indicator">
+          <span id="stepCounter">Layer 1: Execution Engine</span>
+          <span class="step-desc" id="stepDesc">The core virtual machine</span>
+        </div>
+
+        <button class="btn-ctrl primary" id="btnNext" onclick="changeStep(1)">
+          Expand Layer
+          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Canvas Container -->
+    <div class="nested-canvas state-1" id="canvasContainer">
+
+      <!-- Layer 3: JDK -->
+      <div class="arch-box box-jdk">
+        <div class="arch-header header-jdk">
+          <svg width="24" height="24" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+          JDK (Java Development Kit)
+        </div>
+
+        <div class="arch-content">
+
+          <!-- JDK Component: Tools -->
+          <div class="comp-tools">
+            <div class="comp-icon" style="color: var(--warning-color);">
+              <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+            </div>
+            <div class="comp-title">Development Tools</div>
+            <div class="comp-desc">javac, java, jar, javadoc, and other tools</div>
+          </div>
+
+          <!-- Layer 2: JRE -->
+          <div class="arch-box box-jre">
+            <div class="arch-header header-jre">
+              <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"></path></svg>
+              JRE (Java Runtime Environment)
+            </div>
+
+            <div class="arch-content">
+
+              <!-- JRE Component: Libraries -->
+              <div class="comp-libs">
+                <div class="comp-icon" style="color: var(--success-color);">
+                  <svg width="32" height="32" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                </div>
+                <div class="comp-title">Core Libraries</div>
+                <div class="comp-desc">Supporting runtime libraries (e.g., java.util, java.lang)</div>
+              </div>
+
+              <!-- Layer 1: JVM -->
+              <div class="arch-box box-jvm">
+                <div class="arch-header">
+                  <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" fill="var(--workspace-bg)"></path></svg>
+                </div>
+                <div class="comp-title">JVM</div>
+                <div class="comp-desc" style="color: var(--primary-color); font-weight: 600;">Java Virtual Machine</div>
+                <div class="comp-desc">Loads and executes Java bytecode</div>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentStep = 1;
+  const maxStep = 3;
+
+  const phaseData = [
+    { phase: "", desc: "" },
+    { phase: "Layer 1: JVM", desc: "Loads and executes bytecode; manages memory and garbage collection." },
+    { phase: "Layer 2: JRE (JVM + Libraries)", desc: "Traditionally: the JVM plus supporting runtime libraries." },
+    { phase: "Layer 3: JDK (JRE + Tools)", desc: "Development tools plus the components needed to run applications." }
+  ];
+
+  function changeStep(direction) {
+    currentStep += direction;
+    if (currentStep < 1) currentStep = 1;
+    if (currentStep > maxStep) currentStep = maxStep;
+
+    // Update UI Controls
+    document.getElementById('btnPrev').disabled = (currentStep === 1);
+    document.getElementById('btnNext').disabled = (currentStep === maxStep);
+
+    document.getElementById('stepCounter').innerText = phaseData[currentStep].phase;
+    document.getElementById('stepDesc').innerText = phaseData[currentStep].desc;
+
+    // Update Canvas State Class
+    const canvas = document.getElementById('canvasContainer');
+    canvas.classList.remove('state-1', 'state-2', 'state-3');
+    canvas.classList.add(`state-${currentStep}`);
+  }
+  changeStep(0);
+</script>
+</body>
+</html>
