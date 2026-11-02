@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Java Basic Operators Quiz</title>
+    <link rel="stylesheet" href="chapter-02.css">
+    <style>
+        .question h2 { color: var(--primary-color); }
+        .code-block {
+            background: #161d2e;
+            color: #e5edf9;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font: clamp(15px, 2vw, 20px)/1.85 ui-monospace, SFMono-Regular, Consolas, monospace;
+            overflow-x: auto;
+            white-space: nowrap;
+            margin-bottom: 1.5rem;
+        }
+        .keyword { color: #c9a7ff; }
+        .type { color: #82dce5; }
+        .variable { color: #a9c7ff; }
+        .question-variable {
+            display: inline-block;
+            color: #fff;
+            background: #0056b3;
+            border: 2px solid #003f85;
+            border-radius: 6px;
+            padding: .2em .6em;
+            font-size: 1.15em;
+            font-weight: 800;
+        }
+        .code-block .variable-focus {
+            color: #c7ddff;
+            font-weight: 600;
+        }
+        .number { color: #f6bd86; }
+        .operator { color: #ff9ab5; }
+        .method { color: #ffd580; }
+        .punctuation { color: #e5edf9; }
+        .answer-box {
+            display: inline-block;
+            width: min(150px, 100%);
+            border-bottom: 1px solid var(--text-muted);
+            padding: .5rem;
+            vertical-align: bottom;
+        }
+        .answer-key { display: none; }
+        .answer-key li { margin-bottom: .5rem; }
+        @media (max-width: 600px) {
+            .code-block { padding: 1rem; }
+        }
+        @media print {
+            body { background: #fff; padding: 0; color: #000; }
+            .container { max-width: none; }
+            .card {
+                box-shadow: none;
+                border: 0;
+                border-radius: 0;
+                padding: 1rem 0;
+                margin-bottom: 1rem;
+            }
+            .hero { background: #fff; }
+            h1 { font-size: 24pt; }
+            .question { break-inside: avoid; }
+            .code-block {
+                background: #fff;
+                border: 1px solid #ccc;
+                font-size: 11pt;
+                white-space: normal;
+            }
+            .code-block, .code-block span { color: #000; }
+            .answer-key { display: block; break-before: page; }
+        }
+    </style>
+</head>
+<body>
+
+<main class="container">
+    <header class="card hero">
+        <span class="eyebrow">Fundamentals of Java Programming · Quiz 01</span>
+    <h1>Java Basic Operators &ndash; Short Quiz</h1>
+        <p>Trace each expression and write your answer in the space provided.</p>
+    </header>
+
+    <section class="question card">
+        <h2>Question 1</h2>
+        <p>What is the output of the following Java code?</p>
+
+        <div class="code-block">
+            <span class="keyword">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">7</span><span class="punctuation">;</span><br>
+            <span class="variable">x</span> <span class="operator">+=</span> <span class="number">3</span><span class="punctuation">;</span><br>
+            <span class="variable">x</span> <span class="operator">*=</span> <span class="number">2</span><span class="punctuation">;</span><br>
+            <span class="variable">x</span> <span class="operator">+=</span> <span class="number">4</span><span class="punctuation">;</span><br>
+            <span class="variable">x</span><span class="operator">--</span><span class="punctuation">;</span><br>
+            <span class="type">System</span><span class="punctuation">.</span><span class="variable">out</span><span class="punctuation">.</span><span class="method">println</span><span class="punctuation">(</span><span class="variable">x</span><span class="punctuation">);</span>
+        </div>
+
+        <p><strong>Output:</strong> <span class="answer-box"></span></p>
+    </section>
+
+    <section class="question card">
+        <h2>Question 2</h2>
+        <p>Given <code class="question-variable">a = 5</code> and <code class="question-variable">b = 3</code>, what is the value of <code>total</code> after executing this statement?</p>
+
+        <div class="code-block">
+            <span class="keyword">int</span> <span class="variable">total</span> <span class="operator">=</span> <span class="variable variable-focus">b</span><span class="operator">++</span> <span class="operator">*</span> <span class="operator">++</span><span class="variable variable-focus">a</span> <span class="operator">/</span> <span class="number">2</span> <span class="operator">+</span> <span class="operator">--</span><span class="variable variable-focus">b</span><span class="punctuation">;</span>
+        </div>
+
+        <p><strong>Value of <code>total</code>:</strong> <span class="answer-box"></span></p>
+    </section>
+
+    <section class="answer-key card">
+        <h2>Answer Key (For Instructor)</h2>
+        <ol>
+            <li><strong>23</strong><br>
+                <ul>
+                    <li><code>x</code> starts at 7.</li>
+                    <li><code>x += 3</code> &rarr; x = 10.</li>
+                    <li><code>x *= 2</code> &rarr; x = 20.</li>
+                    <li><code>x += 4</code> &rarr; x = 24.</li>
+                    <li><code>x--</code> &rarr; x = 23.</li>
+                </ul>
+            </li>
+            <br>
+            <li><strong>12</strong><br>
+                <ul>
+                    <li><code>b++</code> evaluates to 3 (post-increment, so b becomes 4 in memory).</li>
+                    <li><code>++a</code> evaluates to 6 (pre-increment, a becomes 6).</li>
+                    <li>The multiplication happens first: 3 * 6 = 18.</li>
+                    <li>The division happens next: 18 / 2 = 9.</li>
+                    <li><code>--b</code> evaluates to 3 (pre-decrement, b goes from 4 down to 3).</li>
+                    <li>The addition happens last: 9 + 3 = 12.</li>
+                </ul>
+            </li>
+        </ol>
+    </section>
+</main>
+
+</body>
+</html>
