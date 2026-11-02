@@ -1,0 +1,85 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Chapter 5 · Write Java Code — Practice Questions</title><style>
+:root {
+    color-scheme: light;
+    --workspace-bg: #f8f9fa;
+    --card-bg: #ffffff;
+    --text-main: #1a1f36;
+    --text-muted: #697386;
+    --border-color: #e3e8ee;
+    --primary-color: #0070f3;
+    --primary-hover: #0056b3;
+    --primary-soft: #e5f0ff;
+    --success-color: #10b981;
+    --success-soft: #ecfdf5;
+    --radius-lg: 24px;
+    --radius-md: 16px;
+    --shadow-soft: 0 4px 20px rgba(0,0,0,.04);
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; padding: 2rem 1rem; background: var(--workspace-bg); color: var(--text-main); font-family: system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; line-height: 1.5; }
+a { color: var(--primary-color); text-underline-offset: .2em; }
+button,input,select { font: inherit; }
+button { cursor: pointer; border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: .75rem 1.5rem; background: var(--card-bg); color: var(--text-main); font-size: .95rem; font-weight: 600; transition: background .2s; }
+button:hover { background: var(--primary-soft); border-color: var(--primary-color); }
+:focus-visible { outline: 3px solid var(--primary-color); outline-offset: 4px; }
+.opening,main { max-width: 1024px; margin: 0 auto; }
+.opening { min-height: calc(100svh - 4rem); display: flex; flex-direction: column; padding: 2rem; background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: var(--shadow-soft); }
+.bar { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; font-size: .875rem; color: var(--text-muted); }
+.eyebrow { display: block; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--text-muted); }
+h1 { font-size: clamp(1.8rem,4vw,2.5rem); line-height: 1.15; letter-spacing: -.035em; margin: 2rem 0 1rem; }
+h2 { font-size: clamp(1.5rem,3vw,2rem); line-height: 1.25; letter-spacing: -.025em; margin: .5rem 0 1rem; }
+h3 { font-size: 1.25rem; margin: 2rem 0 1rem; }
+p { color: var(--text-muted); font-size: 1.0625rem; margin: 1rem 0; }
+.hint { margin: 0 0 1.5rem; }
+#fullscreen,#run-if,.run-example { background: var(--primary-color); border-color: var(--primary-color); color: #fff; }
+#fullscreen:hover,#run-if:hover,.run-example:hover { background: var(--primary-hover); }
+.code-stage { flex: 1; display: flex; align-items: center; overflow-x: auto; background: var(--workspace-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem; margin-bottom: 1.5rem; }
+pre { margin: 1.5rem 0; padding: 1.5rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); background: var(--workspace-bg); color: var(--text-main); font: clamp(15px,1.7vw,20px)/1.8 ui-monospace,SFMono-Regular,Consolas,monospace; overflow: auto; tab-size: 4; }
+code { font-family: ui-monospace,SFMono-Regular,Consolas,monospace; }
+.opening-code { padding: 0; margin: 0; border: 0; background: transparent; font-size: clamp(17px,2.4vw,30px); line-height: 2; white-space: pre; }
+.part { font: inherit; color: inherit; white-space: pre; text-align: left; background: transparent; border: 0; border-radius: 6px; padding: 0 4px; text-decoration: underline; text-decoration-color: #aebdce; text-underline-offset: 7px; }
+.part:hover,.part[aria-expanded=true] { background: var(--primary-soft); text-decoration-color: var(--primary-color); }
+.kw { color: #7541b0; }.num { color: #a64b13; }.str { color: #217141; }.tail { color: #0056b3; }
+.opening footer { display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; color: var(--text-muted); font-size: .875rem; }
+main { padding-top: 1.5rem; }
+.toc { display: flex; flex-wrap: wrap; gap: .75rem; padding: 1.5rem 2rem; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--card-bg); box-shadow: var(--shadow-soft); }
+.toc a { padding: .5rem 1rem; border-radius: var(--radius-md); text-decoration: none; font-size: .95rem; font-weight: 600; }.toc a:hover { background: var(--primary-soft); }
+section.lesson { margin-top: 1.5rem; padding: 2rem; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--card-bg); box-shadow: var(--shadow-soft); scroll-margin-top: 1.5rem; }
+details { margin: 1.5rem 0; border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; }
+summary { cursor: pointer; padding: 1rem 1.5rem; background: var(--primary-soft); color: var(--primary-hover); font-size: 1rem; font-weight: 600; }
+details pre,details p { margin: 1.5rem; }
+details .if-controls,details .if-workspace { margin: 1.5rem; }
+details .live-console pre { margin: .75rem 0 0; }
+select { width: auto; }
+.output { background: var(--success-soft); border-color: #b9e8d6; border-left: 4px solid var(--success-color); color: #176044; }
+label { display: inline-flex; gap: .75rem; align-items: center; flex-wrap: wrap; margin: .5rem 1rem .5rem 0; font-weight: 600; }
+input,select { width: 110px; padding: .75rem; color: var(--text-main); background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.trace { padding: 1.5rem; margin-top: 1rem; border: 1px solid #c9ddfa; border-left: 4px solid var(--primary-color); border-radius: var(--radius-md); background: #f3f7ff; color: var(--text-main); white-space: pre-wrap; font: 1rem/1.8 ui-monospace,SFMono-Regular,Consolas,monospace; }
+article+article { border-top: 1px solid var(--border-color); margin-top: 2rem; }
+.closing { padding: 1.5rem 0 0; color: var(--text-muted); }.closing p { font-size: .875rem; }.end-links { display: flex; gap: 1.5rem; flex-wrap: wrap; font-size: .875rem; }
+dialog { margin: auto; width: min(760px,calc(100% - 2rem)); max-height: 85svh; padding: 2rem; color: var(--text-main); background: var(--card-bg); border: 1px solid var(--border-color); border-radius: var(--radius-lg); box-shadow: 0 20px 70px #1a1f3626; }
+dialog::backdrop { background: #1a1f3659; }dialog h2 { margin-top: 1.5rem; }dialog pre { font-size: 18px; }body:has(dialog[open]) { overflow: hidden; }
+@media(max-width:600px) { body { padding: 1rem; }.opening { min-height: calc(100svh - 2rem); padding: 1.25rem; }.opening-code { font-size: 16px; }.code-stage { padding: 1rem; min-height: 320px; }section.lesson,dialog { padding: 1.5rem; }.toc { padding: 1rem; gap: .25rem; }pre { padding: 1rem; }details pre,details p { margin: 1rem; }.bar { gap: .75rem; }.bar .eyebrow { order: -1; width: 100%; } }
+@media(prefers-reduced-motion:reduce) { html { scroll-behavior: auto; }* { transition: none !important; } }
+.if-controls { display: flex; align-items: center; flex-wrap: wrap; gap: .75rem; margin-top: 1.5rem; }
+.if-controls label { margin: 0; font-family: ui-monospace,monospace; }
+.if-workspace { margin-top: 1.5rem; }
+.live-code { padding: 1rem 0; font-size: clamp(14px,1.65vw,18px); }
+.code-line { display: block; padding: .3rem 1rem; border-left: 3px solid transparent; min-width: max-content; }
+.line-number { display: inline-block; width: 2rem; color: var(--text-muted); user-select: none; }
+.execution-note { font-size: .85em; font-style: italic; }
+.evaluated { background: var(--primary-soft); border-left-color: var(--primary-color); }
+.executed { background: var(--success-soft); border-left-color: var(--success-color); }
+.skipped { background: #f1f2f4; color: #697386; border-left: 3px dashed #9ca3af; }
+.skipped .str { color: #697386; }
+.live-console { padding: 1.25rem; border: 1px solid var(--border-color); border-radius: var(--radius-md); }
+.live-console pre { margin: .75rem 0 0; min-height: 5.5rem; }
+@media print { body { padding: 0; background: white; }.opening { min-height: 0; }.bar button,dialog,.toc { display: none; }.opening,section.lesson { box-shadow: none; break-inside: avoid; }pre { white-space: pre-wrap; }.part { text-decoration: none; } }
+
+.question-header { max-width:1024px; margin:auto; padding:2rem; background:var(--card-bg); border:1px solid var(--border-color); border-radius:var(--radius-lg); box-shadow:var(--shadow-soft); }.question-header h1 { margin-top:1rem; }.question-text { font-size:1.2rem; color:var(--text-main); line-height:1.7; }.question-nav { display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1.5rem; }.question-nav a { border:1px solid var(--border-color); padding:.5rem .8rem; border-radius:10px; text-decoration:none; }.requirements { border-left:3px solid var(--primary-color); padding-left:1rem; }.question-footer { max-width:1024px; margin:1.5rem auto; }.lesson h2 { font-size:1.5rem; }.question-header p { max-width:850px; }
+
+
+.answer-space { min-height: 300px; margin-top: 1.5rem; }
+@media print { .answer-space { min-height: 240px; } }
+</style></head><body><header class="question-header"><nav class="bar"><a href="ch-05-01.html">← Chapter 5 lecture</a><span>WISE University · Java Fundamentals</span><a href="index.html#ch-05">Course home</a></nav><h1>Java if statements: practice questions</h1><span class="eyebrow">Chapter 05 · Coding questions</span><nav class="question-nav" aria-label="Jump to a question"><a href="#question-1" aria-label="Question 1: Hot or not?">01</a><a href="#question-2" aria-label="Question 2: Did the student pass?">02</a><a href="#question-3" aria-label="Question 3: Check the age">03</a><a href="#question-4" aria-label="Question 4: Pass or fail">04</a><a href="#question-5" aria-label="Question 5: Even or odd">05</a><a href="#question-6" aria-label="Question 6: Positive, negative, or zero">06</a><a href="#question-7" aria-label="Question 7: Can the student get a scholarship?">07</a><a href="#question-8" aria-label="Question 8: Find the grade">08</a><a href="#question-9" aria-label="Question 9: Check a positive number">09</a><a href="#question-10" aria-label="Question 10: Shopping discount">10</a><a href="#question-11" aria-label="Question 11: Check the mark first">11</a><a href="#question-12" aria-label="Question 12: Print the final bill">12</a></nav></header><main><section class="lesson" id="question-1" aria-label="Question 1"><h2>Question 01</h2><p class="question-text">Write a Java program. Set temperature to 35. If it is greater than 30, print &quot;Hot day&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-2" aria-label="Question 2"><h2>Question 02</h2><p class="question-text">Write a Java program. Set mark to 50. If mark is 50 or more, print &quot;Pass&quot;. Always print &quot;Finished&quot; at the end.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-3" aria-label="Question 3"><h2>Question 03</h2><p class="question-text">Write a Java program that asks for an age. If the age is 18 or more, print &quot;You are a young man.&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-4" aria-label="Question 4"><h2>Question 04</h2><p class="question-text">Write a Java program that asks for a mark. Print &quot;Pass&quot; if the mark is 50 or more. Otherwise, print &quot;Fail&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-5" aria-label="Question 5"><h2>Question 05</h2><p class="question-text">Write a Java program that asks for a whole number. Print &quot;Even&quot; if it is even. Otherwise, print &quot;Odd&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-6" aria-label="Question 6"><h2>Question 06</h2><p class="question-text">Write a Java program that asks for a whole number. Print &quot;Positive&quot;, &quot;Negative&quot;, or &quot;Zero&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-7" aria-label="Question 7"><h2>Question 07</h2><p class="question-text">Write a Java program that asks for a mark and attendance percentage. Print &quot;Eligible&quot; if the mark is 85 or more and attendance is 80 or more. Otherwise, print &quot;Not eligible&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-8" aria-label="Question 8"><h2>Question 08</h2><p class="question-text">Write a Java program that asks for a mark. Print the grade: 90–100 = &quot;Excellent&quot;, 80–89 = &quot;Very Good&quot;, 70–79 = &quot;Good&quot;, 50–69 = &quot;Pass&quot;, and 0–49 = &quot;Fail&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-9" aria-label="Question 9"><h2>Question 9</h2><p class="question-text">Write a Java program that asks for a whole number. If it is positive, print &quot;Positive Even Number&quot; or &quot;Positive Odd Number&quot;. Otherwise, print &quot;Number is not positive&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-10" aria-label="Question 10"><h2>Question 10</h2><p class="question-text">Write a Java program that asks for a purchase amount and whether the customer is a member. If the amount is 100 or more, give members 20% off and other customers 10% off. If it is below 100, print &quot;No discount.&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-11" aria-label="Question 11"><h2>Question 11</h2><p class="question-text">Write a Java program that asks for a mark. If it is below 0 or above 100, print &quot;Invalid mark&quot;. Otherwise, print the grade using the rules in Question 8.</p><div class="answer-space" aria-label="Space for your answer"></div></section><section class="lesson" id="question-12" aria-label="Question 12"><h2>Question 12</h2><p class="question-text">Write a Java program that asks for a purchase amount and membership status. Use the discount rules in Question 10. Print the discount amount and the final bill. If the amount is negative, print &quot;Invalid amount&quot;.</p><div class="answer-space" aria-label="Space for your answer"></div></section></main><footer class="closing question-footer"><div class="end-links"><a href="ch-05-01.html">← Chapter 5 lecture</a><a href="#">↑ All questions</a><a href="index.html#ch-05">Course home</a></div></footer></body></html>
